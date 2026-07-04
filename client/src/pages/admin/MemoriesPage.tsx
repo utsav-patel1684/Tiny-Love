@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Trash2, ExternalLink, X } from "lucide-react";
 import { PaginationControls } from "../../components/ui/PaginationControls";
+import { ConfirmDialog } from "../../components/ConfirmDialog";
 
 const API_URL_STORAGE_KEY = "kinstory_admin_api_url";
 const DEFAULT_API_URL = "http://localhost:5001/api";
@@ -16,6 +17,8 @@ export default function MemoriesPage() {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalRecords, setTotalRecords] = useState(0);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [confirmingId, setConfirmingId] = useState<string | null>(null);
 
   const fetchMemories = async () => {
     setLoading(true);
@@ -39,15 +42,23 @@ export default function MemoriesPage() {
     fetchMemories();
   }, [apiUrl, page]);
 
-  const deleteMemory = async (memoryId: string) => {
-    if (!window.confirm("Are you sure you want to delete this memory?")) return;
+  const deleteMemory = (memoryId: string) => {
+    setConfirmingId(memoryId);
+    setConfirmOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!confirmingId) return;
     try {
-      const res = await fetch(`${apiUrl}/admin/memories/${memoryId}`, { method: "DELETE" });
+      const res = await fetch(`${apiUrl}/admin/memories/${confirmingId}`, { method: "DELETE" });
       if (!res.ok) throw new Error();
       alert("Memory deleted successfully.");
       fetchMemories();
     } catch {
       alert("Failed to delete memory.");
+    } finally {
+      setConfirmOpen(false);
+      setConfirmingId(null);
     }
   };
 
@@ -79,7 +90,7 @@ export default function MemoriesPage() {
           )}
         </div>
         <div className="text-xs text-gray-400 font-medium">
-          {loading ? "Loading..." : `Total ${totalRecords} entries in database`}
+          {loading ? "" : `Total ${totalRecords} entries in database`}
         </div>
       </div>
 
@@ -103,7 +114,7 @@ export default function MemoriesPage() {
                 <th className="px-6 py-4">Attachment / Type</th>
                 <th className="px-6 py-4">Owner & Baby</th>
                 <th className="px-6 py-4">Engagement</th>
-                <th className="px-6 py-4">Created At</th>
+                {/* <th className="px-6 py-4">Created At</th> */}
                 <th className="px-6 py-4 text-right">Actions</th>
               </tr>
             </thead>
@@ -115,7 +126,7 @@ export default function MemoriesPage() {
                 <tr key={m.id} className="hover:bg-gray-50/50 transition-colors">
                   <td className="px-6 py-4 max-w-xs">
                     <div className="font-semibold text-gray-800 truncate" title={m.caption}>
-                      {m.caption || <span className="italic text-gray-400">No caption</span>}
+                      {m.caption || <span className="a text-gray-400">No caption</span>}
                     </div>
                   </td>
                   <td className="px-6 py-4">
@@ -136,7 +147,7 @@ export default function MemoriesPage() {
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-2">
                       <span className="font-semibold text-gray-800">Baby: {m.babyName || "Unknown"}</span>
-                      <span className="text-xs text-gray-400">| By: {m.uploaderName} ({m.uploaderEmail})</span>
+                      <span className="text-xs text-gray-400">| By: {m.uploaderName} </span>
                     </div>
                   </td>
                   <td className="px-6 py-4 text-xs font-semibold text-gray-500">
@@ -145,7 +156,7 @@ export default function MemoriesPage() {
                       <span>Reactions: {m.reactionCount}</span>
                     </div>
                   </td>
-                  <td className="px-6 py-4 text-xs text-gray-400">{formatDate(m.createdAt)}</td>
+                  {/* <td className="px-6 py-4 text-xs text-gray-400">{formatDate(m.createdAt)}</td> */}
                   <td className="px-6 py-4 text-right">
                     <button
                       onClick={() => deleteMemory(m.id)}
@@ -173,6 +184,20 @@ export default function MemoriesPage() {
         currentPage={page}
         totalPages={totalPages}
         onPageChange={setPage}
+      />
+      
+      <ConfirmDialog
+        open={confirmOpen}
+        title="Delete Memory"
+        description="Are you sure you want to delete this memory?"
+        confirmText="Delete"
+        cancelText="Cancel"
+        isDestructive={true}
+        onConfirm={handleConfirmDelete}
+        onCancel={() => {
+          setConfirmOpen(false);
+          setConfirmingId(null);
+        }}
       />
     </div>
   );

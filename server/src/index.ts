@@ -207,14 +207,13 @@ app.get('/api/admin/invites', async (req, res) => {
     const limit = parseInt(req.query.limit as string) || 10;
     const offset = (page - 1) * limit;
 
-    const countRes = await pool.query('SELECT COUNT(*) FROM family_invites');
+    const countRes = await pool.query('SELECT COUNT(*) FROM invites');
     const total = parseInt(countRes.rows[0].count);
 
     const { rows } = await pool.query(
-      `SELECT i.*, b.name as "babyName", u.name as "inviterName"
-       FROM family_invites i
+      `SELECT i.*, b.name as "babyName"
+       FROM invites i
        LEFT JOIN babies b ON b.id = i.baby_id
-       LEFT JOIN users u ON u.id = i.inviter_id
        ORDER BY i.created_at DESC
        LIMIT $1 OFFSET $2`,
       [limit, offset]

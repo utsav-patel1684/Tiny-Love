@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Trash2, X } from "lucide-react";
 import { PaginationControls } from "../../components/ui/PaginationControls";
+import { ConfirmDialog } from "../../components/ConfirmDialog";
 
 const API_URL_STORAGE_KEY = "kinstory_admin_api_url";
 const DEFAULT_API_URL = "http://localhost:5001/api";
@@ -16,6 +17,8 @@ export default function UsersPage() {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalRecords, setTotalRecords] = useState(0);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [confirmingId, setConfirmingId] = useState<string | null>(null);
 
   const fetchUsers = async () => {
     setLoading(true);
@@ -39,15 +42,23 @@ export default function UsersPage() {
     fetchUsers();
   }, [apiUrl, page]);
 
-  const deleteUser = async (userId: string) => {
-    if (!window.confirm("WARNING: Deleting this user will cascade-delete all their baby profiles, memories, invites, reactions, comments, and push tokens. Proceed?")) return;
+  const deleteUser = (userId: string) => {
+    setConfirmingId(userId);
+    setConfirmOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!confirmingId) return;
     try {
-      const res = await fetch(`${apiUrl}/admin/users/${userId}`, { method: "DELETE" });
+      const res = await fetch(`${apiUrl}/admin/users/${confirmingId}`, { method: "DELETE" });
       if (!res.ok) throw new Error();
       alert("User deleted successfully.");
       fetchUsers(); // Refresh current page
     } catch {
       alert("Failed to delete user.");
+    } finally {
+      setConfirmOpen(false);
+      setConfirmingId(null);
     }
   };
 
@@ -80,7 +91,7 @@ export default function UsersPage() {
           )}
         </div>
         <div className="text-xs text-gray-400 font-medium">
-          {loading ? "Loading..." : `Total ${totalRecords} entries in database`}
+          {loading ? "" : `Total ${totalRecords} entries in database`}
         </div>
       </div>
 
@@ -171,6 +182,20 @@ export default function UsersPage() {
         currentPage={page}
         totalPages={totalPages}
         onPageChange={setPage}
+      />
+      
+      <ConfirmDialog
+        open={confirmOpen}
+        title="Delete User"
+        description="WARNING: Deleting this user will cascade-delete all their baby profiles, memories, invites, reactions, comments, and push tokens. Proceed?"
+        confirmText="Delete"
+        cancelText="Cancel"
+        isDestructive={true}
+        onConfirm={handleConfirmDelete}
+        onCancel={() => {
+          setConfirmOpen(false);
+          setConfirmingId(null);
+        }}
       />
     </div>
   );

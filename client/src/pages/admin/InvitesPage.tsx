@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Trash2, X } from "lucide-react";
 import { PaginationControls } from "../../components/ui/PaginationControls";
+import { ConfirmDialog } from "../../components/ConfirmDialog";
 
 const API_URL_STORAGE_KEY = "kinstory_admin_api_url";
 const DEFAULT_API_URL = "http://localhost:5001/api";
@@ -16,6 +17,8 @@ export default function InvitesPage() {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalRecords, setTotalRecords] = useState(0);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [confirmingId, setConfirmingId] = useState<string | null>(null);
 
   const fetchInvites = async () => {
     setLoading(true);
@@ -39,15 +42,23 @@ export default function InvitesPage() {
     fetchInvites();
   }, [apiUrl, page]);
 
-  const deleteInvite = async (inviteId: string) => {
-    if (!window.confirm("Are you sure you want to revoke this invite?")) return;
+  const revokeInvite = (inviteId: string) => {
+    setConfirmingId(inviteId);
+    setConfirmOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!confirmingId) return;
     try {
-      const res = await fetch(`${apiUrl}/admin/invites/${inviteId}`, { method: "DELETE" });
+      const res = await fetch(`${apiUrl}/admin/invites/${confirmingId}`, { method: "DELETE" });
       if (!res.ok) throw new Error();
       alert("Invite revoked successfully.");
       fetchInvites();
     } catch {
       alert("Failed to revoke invite.");
+    } finally {
+      setConfirmOpen(false);
+      setConfirmingId(null);
     }
   };
 
@@ -79,7 +90,7 @@ export default function InvitesPage() {
           )}
         </div>
         <div className="text-xs text-gray-400 font-medium">
-          {loading ? "Loading..." : `Total ${totalRecords} entries in database`}
+          {loading ? "" : `Total ${totalRecords} entries in database`}
         </div>
       </div>
 
@@ -103,7 +114,7 @@ export default function InvitesPage() {
                 <th className="px-6 py-4">Invited Family Role</th>
                 <th className="px-6 py-4">Assigned Baby</th>
                 <th className="px-6 py-4">Details</th>
-                <th className="px-6 py-4">Expiry Date</th>
+               
                 <th className="px-6 py-4 text-right">Actions</th>
               </tr>
             </thead>
@@ -141,10 +152,10 @@ export default function InvitesPage() {
                       </div>
                     </div>
                   </td>
-                  <td className="px-6 py-4 text-xs text-gray-400">{formatDate(i.expiresAt)}</td>
+                 
                   <td className="px-6 py-4 text-right">
                     <button
-                      onClick={() => deleteInvite(i.id)}
+                      onClick={() => revokeInvite(i.id)}
                       className="text-red-400 hover:text-red-600 hover:bg-red-50 p-2 rounded-lg transition-colors cursor-pointer"
                       title="Revoke Invite"
                     >
@@ -169,6 +180,20 @@ export default function InvitesPage() {
         currentPage={page}
         totalPages={totalPages}
         onPageChange={setPage}
+      />
+      
+      <ConfirmDialog
+        open={confirmOpen}
+        title="Revoke Invite"
+        description="Are you sure you want to revoke this invite?"
+        confirmText="Revoke"
+        cancelText="Cancel"
+        isDestructive={true}
+        onConfirm={handleConfirmDelete}
+        onCancel={() => {
+          setConfirmOpen(false);
+          setConfirmingId(null);
+        }}
       />
     </div>
   );

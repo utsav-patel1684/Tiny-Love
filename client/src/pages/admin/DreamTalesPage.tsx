@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Trash2, X } from "lucide-react";
 import { PaginationControls } from "../../components/ui/PaginationControls";
+import { ConfirmDialog } from "../../components/ConfirmDialog";
 
 const API_URL_STORAGE_KEY = "kinstory_admin_api_url";
 const DEFAULT_API_URL = "http://localhost:5001/api";
@@ -16,6 +17,8 @@ export default function DreamTalesPage() {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalRecords, setTotalRecords] = useState(0);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [confirmingId, setConfirmingId] = useState<string | null>(null);
 
   const fetchDreamTales = async () => {
     setLoading(true);
@@ -39,15 +42,23 @@ export default function DreamTalesPage() {
     fetchDreamTales();
   }, [apiUrl, page]);
 
-  const deleteDreamTale = async (taleId: string) => {
-    if (!window.confirm("Are you sure you want to delete this Dream Tale?")) return;
+  const deleteDreamTale = (dreamTaleId: string) => {
+    setConfirmingId(dreamTaleId);
+    setConfirmOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!confirmingId) return;
     try {
-      const res = await fetch(`${apiUrl}/admin/dream-tales/${taleId}`, { method: "DELETE" });
+      const res = await fetch(`${apiUrl}/admin/dream-tales/${confirmingId}`, { method: "DELETE" });
       if (!res.ok) throw new Error();
       alert("Dream Tale deleted successfully.");
       fetchDreamTales();
     } catch {
       alert("Failed to delete Dream Tale.");
+    } finally {
+      setConfirmOpen(false);
+      setConfirmingId(null);
     }
   };
 
@@ -79,7 +90,7 @@ export default function DreamTalesPage() {
           )}
         </div>
         <div className="text-xs text-gray-400 font-medium">
-          {loading ? "Loading..." : `Total ${totalRecords} entries in database`}
+          {loading ? "" : `Total ${totalRecords} entries in database`}
         </div>
       </div>
 
@@ -166,6 +177,20 @@ export default function DreamTalesPage() {
         currentPage={page}
         totalPages={totalPages}
         onPageChange={setPage}
+      />
+      
+      <ConfirmDialog
+        open={confirmOpen}
+        title="Delete Dream Tale"
+        description="Are you sure you want to delete this Dream Tale?"
+        confirmText="Delete"
+        cancelText="Cancel"
+        isDestructive={true}
+        onConfirm={handleConfirmDelete}
+        onCancel={() => {
+          setConfirmOpen(false);
+          setConfirmingId(null);
+        }}
       />
     </div>
   );

@@ -9,7 +9,6 @@ import {
   reactionsTable,
   dreamTalesTable,
   invitesTable,
-  familyMembersTable,
 } from "@workspace/db";
 
 const router: IRouter = Router();
@@ -317,12 +316,10 @@ router.get("/admin/invites", async (req, res): Promise<void> => {
         expiresAt: invitesTable.expiresAt,
         babyName: babiesTable.name,
         inviterName: usersTable.name,
-        canManageContent: familyMembersTable.canManageContent,
       })
       .from(invitesTable)
       .leftJoin(babiesTable, eq(invitesTable.babyId, babiesTable.id))
       .leftJoin(usersTable, eq(invitesTable.inviterId, usersTable.id))
-      .leftJoin(familyMembersTable, eq(familyMembersTable.inviteId, invitesTable.id))
       .orderBy(desc(invitesTable.createdAt))
       .limit(limit)
       .offset(offset);
