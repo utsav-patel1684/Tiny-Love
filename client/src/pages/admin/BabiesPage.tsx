@@ -23,7 +23,7 @@ export default function BabiesPage() {
 
     try {
       const data = await apiFetch<any>(
-        `/babies?page=${page}&limit=10`
+        `/admin/babies?page=${page}&limit=10`
       );
 
       setBabies(data.data ?? []);
@@ -50,7 +50,7 @@ export default function BabiesPage() {
   const handleConfirmDelete = async () => {
     if (!confirmingId) return;
     try {
-      await apiFetch(`/babies/${confirmingId}`, {
+      await apiFetch(`/admin/babies/${confirmingId}`, {
         method: "DELETE",
       });
       alert("Baby profile deleted successfully.");

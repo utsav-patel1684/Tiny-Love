@@ -14,7 +14,7 @@ export default function Dashboard() {
   useEffect(() => {
     const fetchOverview = async () => {
       try {
-        const data = await apiFetch<any>("/overview");
+        const data = await apiFetch<any>("/admin/overview");
         setStats(data.counts);
         setUserGrowth(data.charts.userGrowth);
         setMemoryGrowth(data.charts.memoryGrowth);

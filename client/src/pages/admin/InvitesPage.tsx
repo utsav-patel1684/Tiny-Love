@@ -23,7 +23,7 @@ export default function InvitesPage() {
 
     try {
       const data = await apiFetch<any>(
-        `/invites?page=${page}&limit=10`
+        `/admin/invites?page=${page}&limit=10`
       );
 
       setInvites(data.data ?? []);
@@ -50,7 +50,7 @@ export default function InvitesPage() {
   const handleConfirmDelete = async () => {
     if (!confirmingId) return;
     try {
-      await apiFetch(`/invites/${confirmingId}`, {
+      await apiFetch(`/admin/invites/${confirmingId}`, {
         method: "DELETE",
       });
       alert("Invite revoked successfully.");

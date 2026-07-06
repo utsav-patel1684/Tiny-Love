@@ -11,10 +11,16 @@ import {
   Activity,
   AlertTriangle,
   PanelLeftClose,
-  PanelLeft
+  PanelLeft,
+  LogOut // 1. Imported the LogOut icon here
 } from "lucide-react";
 
-export default function AdminLayout() {
+// 2. Define the TypeScript props interface to receive onLogout from App.tsx
+interface AdminLayoutProps {
+  onLogout: () => void;
+}
+
+export default function AdminLayout({ onLogout }: AdminLayoutProps) {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const location = useLocation();
   const currentPath = location.pathname;
@@ -41,43 +47,62 @@ export default function AdminLayout() {
     <div className="flex h-screen bg-background text-foreground font-sans">
       {/* Sidebar */}
       <aside className={`${isCollapsed ? 'w-20' : 'w-57'} bg-sidebar text-sidebar-foreground flex flex-col shadow-2xl border-r border-sidebar-border/10 h-screen sticky top-0 transition-all duration-300 overflow-hidden`}>
-        <div className="flex-1 flex flex-col">
-          {/* Brand Header */}
-          <div className={`h-20 flex items-center border-b border-border/30 transition-all duration-300 ${isCollapsed ? 'justify-center px-0' : 'px-6'}`}>
-            <div className={`flex items-center transition-all duration-300 ${isCollapsed ? 'justify-center' : 'gap-3'}`}>
-              <div className="h-12 w-12 rounded-xl overflow-hidden bg-[#E1A53D] flex items-center justify-center shadow-md flex-shrink-0">
-                <img src={TinyLogo} alt="Tiny Love logo" className="h-full w-full object-cover" />
-              </div>
-              <div className={`flex flex-col transition-all duration-300 whitespace-nowrap ${isCollapsed ? 'opacity-0 w-0 overflow-hidden ml-0' : 'opacity-100 w-auto ml-2'}`}>
-                <h1 className="font-semibold text-lg tracking-wider text-white">Tiny Love</h1>
+        <div className="flex-1 flex flex-col justify-between"> {/* Changed to justify-between to place logout button at the absolute bottom */}
+          <div>
+            {/* Brand Header */}
+            <div className={`h-20 flex items-center border-b border-border/30 transition-all duration-300 ${isCollapsed ? 'justify-center px-0' : 'px-6'}`}>
+              <div className={`flex items-center transition-all duration-300 ${isCollapsed ? 'justify-center' : 'gap-3'}`}>
+                <div className="h-12 w-12 rounded-xl overflow-hidden bg-[#E1A53D] flex items-center justify-center shadow-md flex-shrink-0">
+                  <img src={TinyLogo} alt="Tiny Love logo" className="h-full w-full object-cover" />
+                </div>
+                <div className={`flex flex-col transition-all duration-300 whitespace-nowrap ${isCollapsed ? 'opacity-0 w-0 overflow-hidden ml-0' : 'opacity-100 w-auto ml-2'}`}>
+                  <h1 className="font-semibold text-lg tracking-wider text-white">Tiny Love</h1>
+                </div>
               </div>
             </div>
+
+            {/* Navigation Links */}
+            <nav className="p-3 space-y-1">
+              {navItems.map((item) => {
+                const isActive = currentPath === item.path;
+                return (
+                  <Link
+                    key={item.path}
+                    to={item.path}
+                    title={isCollapsed ? item.label : undefined}
+                    className={`w-full flex items-center h-11 ${isCollapsed ? 'justify-center px-0' : 'px-4'} rounded-lg text-sm font-medium transition-all duration-200 group cursor-pointer ${isActive
+                      ? "bg-[#E1A53D] text-black shadow-md"
+                      : "text-sidebar-foreground/75 hover:bg-accent/10 hover:text-accent-foreground"
+                      }`}
+                  >
+                    <div className={`flex items-center justify-center transition-all duration-200 ${isCollapsed ? 'w-full' : 'w-4'}`}>
+                      <item.icon className="h-4 w-4 flex-shrink-0 group-hover:scale-110 transition-transform" />
+                    </div>
+                    <span className={`whitespace-nowrap transition-all duration-200 ${isCollapsed ? 'opacity-0 w-0 ml-0 overflow-hidden' : 'opacity-100 w-auto ml-3'}`}>
+                      {item.label}
+                    </span>
+                  </Link>
+                );
+              })}
+            </nav>
           </div>
 
-          {/* Navigation Links */}
-          <nav className="p-3 space-y-1 flex-1">
-            {navItems.map((item) => {
-              const isActive = currentPath === item.path;
-              return (
-                <Link
-                  key={item.path}
-                  to={item.path}
-                  title={isCollapsed ? item.label : undefined}
-                  className={`w-full flex items-center h-11 ${isCollapsed ? 'justify-center px-0' : 'px-4'} rounded-lg text-sm font-medium transition-all duration-200 group cursor-pointer ${isActive
-                    ? "bg-[#E1A53D] text-black shadow-md"
-                    : "text-sidebar-foreground/75 hover:bg-accent/10 hover:text-accent-foreground"
-                    }`}
-                >
-                  <div className={`flex items-center justify-center transition-all duration-200 ${isCollapsed ? 'w-full' : 'w-4'}`}>
-                    <item.icon className="h-4 w-4 flex-shrink-0 group-hover:scale-110 transition-transform" />
-                  </div>
-                  <span className={`whitespace-nowrap transition-all duration-200 ${isCollapsed ? 'opacity-0 w-0 ml-0 overflow-hidden' : 'opacity-100 w-auto ml-3'}`}>
-                    {item.label}
-                  </span>
-                </Link>
-              );
-            })}
-          </nav>
+          {/* 3. New Bottom Sign Out Button Container */}
+          <div className="p-3 border-t border-sidebar-border/10">
+            <button
+              onClick={onLogout}
+              title={isCollapsed ? "Sign Out" : undefined}
+              className={`w-full flex items-center h-11 ${isCollapsed ? 'justify-center px-0' : 'px-4'} rounded-lg text-sm font-medium text-rose-400 hover:bg-rose-500/10 transition-all duration-200 group cursor-pointer`}
+            >
+              <div className={`flex items-center justify-center transition-all duration-200 ${isCollapsed ? 'w-full' : 'w-4'}`}>
+                <LogOut className="h-4 w-4 flex-shrink-0 group-hover:scale-110 transition-transform" />
+              </div>
+              <span className={`whitespace-nowrap transition-all duration-200 ${isCollapsed ? 'opacity-0 w-0 ml-0 overflow-hidden' : 'opacity-100 w-auto ml-3'}`}>
+                Sign Out
+              </span>
+            </button>
+          </div>
+
         </div>
       </aside>
 

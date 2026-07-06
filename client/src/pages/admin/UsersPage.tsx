@@ -22,7 +22,7 @@ export default function UsersPage() {
     setLoading(true);
     try {
       const data = await apiFetch<any>(
-        `/users?page=${page}&limit=10`
+        `/admin/users?page=${page}&limit=10`
       );
       setUsers(data.data);
       setTotalPages(data.totalPages);
@@ -48,7 +48,7 @@ export default function UsersPage() {
   const handleConfirmDelete = async () => {
     if (!confirmingId) return;
     try {
-      await apiFetch(`/users/${confirmingId}`, {
+      await apiFetch(`/admin/users/${confirmingId}`, {
         method: "DELETE",
       });
       alert("User deleted successfully.");

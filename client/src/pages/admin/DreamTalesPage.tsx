@@ -23,7 +23,7 @@ export default function DreamTalesPage() {
 
     try {
       const data = await apiFetch<any>(
-        `/dream-tales?page=${page}&limit=10`
+        `/admin/dream-tales?page=${page}&limit=10`
       );
 
       setDreamTales(data.data ?? []);
@@ -49,7 +49,7 @@ export default function DreamTalesPage() {
   const handleConfirmDelete = async () => {
     if (!confirmingId) return;
     try {
-      await apiFetch(`/dream-tales/${confirmingId}`, {
+      await apiFetch(`/admin/dream-tales/${confirmingId}`, {
         method: "DELETE",
       });
       alert("Dream Tale deleted successfully.");

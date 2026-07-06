@@ -1,40 +1,53 @@
 import { Router } from "express";
-import { pool } from "../db.js";
+import { db } from "../db.js";
+import * as schema from '../schema/index.js'; // Adjust the path if necessary to point to your schema folder
+import { sql, desc, eq } from "drizzle-orm";
 
-console.log("⚡ [Router]: Admin router module initialized");
+const router = Router();
 
-const adminRouter = Router();
-
-// Notice this is just "/users", NOT "/api/users"
-adminRouter.get("/users", async (req, res) => {
+// 1. Dashboard Overview Statistics
+router.get("/overview", async (_req, res) => {
     try {
-        console.log("⚡ [DB]: Fetching user records from Neon...");
-        const page = parseInt(req.query.page as string) || 1;
-        const limit = parseInt(req.query.limit as string) || 10;
-        const offset = (page - 1) * limit;
+        const [users, babies, memories, comments, reactions, dreamTales, invites] = await Promise.all([
+            db.select({ count: sql<number>`count(*)` }).from(schema.usersTable),
+            db.select({ count: sql<number>`count(*)` }).from(schema.babiesTable),
+            db.select({ count: sql<number>`count(*)` }).from(schema.memoriesTable),
+            db.select({ count: sql<number>`count(*)` }).from(schema.commentsTable),
+            db.select({ count: sql<number>`count(*)` }).from(schema.reactionsTable),
+            db.select({ count: sql<number>`count(*)` }).from(schema.dreamTalesTable),
+            db.select({ count: sql<number>`count(*)` }).from(schema.invitesTable),
+        ]);
 
-        const countRes = await pool.query("SELECT COUNT(*) FROM users");
-        const total = parseInt(countRes.rows[0].count);
+        // Aggregate 30-day metrics safely using Drizzle execute wrappers
+        const userGrowthRaw = await db.execute(sql`
+      SELECT DATE(created_at)::text as date, COUNT(*) as count FROM users
+      WHERE created_at >= NOW() - INTERVAL '30 days' GROUP BY DATE(created_at) ORDER BY date ASC
+    `);
 
-        const { rows } = await pool.query(
-            `SELECT id, name, email, is_admin as "isAdmin", created_at as "createdAt"
-       FROM users 
-       ORDER BY created_at DESC 
-       LIMIT $1 OFFSET $2`,
-            [limit, offset]
-        );
+        const memoryGrowthRaw = await db.execute(sql`
+      SELECT DATE(created_at)::text as date, COUNT(*) as count FROM memories
+      WHERE created_at >= NOW() - INTERVAL '30 days' GROUP BY DATE(created_at) ORDER BY date ASC
+    `);
 
         res.json({
-            success: true,
-            data: rows,
-            total,
-            page,
-            totalPages: Math.ceil(total / limit)
+            counts: {
+                users: Number(users[0]?.count || 0),
+                babies: Number(babies[0]?.count || 0),
+                memories: Number(memories[0]?.count || 0),
+                comments: Number(comments[0]?.count || 0),
+                reactions: Number(reactions[0]?.count || 0),
+                dreamTales: Number(dreamTales[0]?.count || 0),
+                invites: Number(invites[0]?.count || 0),
+            },
+            charts: {
+                userGrowth: userGrowthRaw.rows.map((r: any) => ({ date: r.date, count: Number(r.count) })),
+                memoryGrowth: memoryGrowthRaw.rows.map((r: any) => ({ date: r.date, count: Number(r.count) })),
+            },
+            dbStatus: { connected: true }
         });
-    } catch (error) {
-        console.error("❌ [DB Users Error]:", error);
-        res.status(500).json({ success: false, error: String(error) });
+    } catch (e) {
+        res.status(500).json({ error: String(e) });
     }
 });
 
-export default adminRouter;
+export default router;

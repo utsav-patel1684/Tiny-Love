@@ -22,7 +22,7 @@ export default function MemoriesPage() {
 
     try {
       const data = await apiFetch<any>(
-        `/memories?page=${page}&limit=10`
+        `/admin/memories?page=${page}&limit=10`
       );
 
       setMemories(data.data ?? []);
@@ -49,7 +49,7 @@ export default function MemoriesPage() {
   const handleConfirmDelete = async () => {
     if (!confirmingId) return;
     try {
-      await apiFetch(`/memories/${confirmingId}`, {
+      await apiFetch(`/admin/memories/${confirmingId}`, {
         method: "DELETE",
       });
       alert("Memory deleted successfully.");
