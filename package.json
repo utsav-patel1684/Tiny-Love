@@ -12,7 +12,14 @@
     "typecheck": "npm run typecheck -w @workspace/server && npm run typecheck -w @workspace/client"
   },
   "devDependencies": {
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/pg": "^8.20.0",
     "concurrently": "^8.2.2",
     "typescript": "^5.5.4"
+  },
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "drizzle-orm": "^0.45.2",
+    "jsonwebtoken": "^9.0.3"
   }
 }

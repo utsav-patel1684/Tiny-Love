@@ -2,12 +2,10 @@ import React, { useState, useEffect } from "react";
 import { Trash2, X } from "lucide-react";
 import { PaginationControls } from "../../components/ui/PaginationControls";
 import { ConfirmDialog } from "../../components/ConfirmDialog";
-
-const API_URL_STORAGE_KEY = "kinstory_admin_api_url";
-const DEFAULT_API_URL = "http://localhost:5001/api";
+import { apiFetch, getServerUrl } from "../../lib/api";
 
 export default function DreamTalesPage() {
-  const [apiUrl] = useState(() => localStorage.getItem(API_URL_STORAGE_KEY) || DEFAULT_API_URL);
+
   const [dreamTales, setDreamTales] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
@@ -22,13 +20,15 @@ export default function DreamTalesPage() {
 
   const fetchDreamTales = async () => {
     setLoading(true);
+
     try {
-      const res = await fetch(`${apiUrl}/admin/dream-tales?page=${page}&limit=10`);
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const data = await res.json();
-      setDreamTales(data.data);
-      setTotalPages(data.totalPages);
-      setTotalRecords(data.total);
+      const data = await apiFetch<any>(
+        `/dream-tales?page=${page}&limit=10`
+      );
+
+      setDreamTales(data.data ?? []);
+      setTotalPages(data.totalPages ?? 1);
+      setTotalRecords(data.total ?? 0);
       setError(null);
     } catch (err) {
       console.error(err);
@@ -37,10 +37,9 @@ export default function DreamTalesPage() {
       setLoading(false);
     }
   };
-
   useEffect(() => {
     fetchDreamTales();
-  }, [apiUrl, page]);
+  }, [page]);
 
   const deleteDreamTale = (dreamTaleId: string) => {
     setConfirmingId(dreamTaleId);
@@ -50,8 +49,9 @@ export default function DreamTalesPage() {
   const handleConfirmDelete = async () => {
     if (!confirmingId) return;
     try {
-      const res = await fetch(`${apiUrl}/admin/dream-tales/${confirmingId}`, { method: "DELETE" });
-      if (!res.ok) throw new Error();
+      await apiFetch(`/dream-tales/${confirmingId}`, {
+        method: "DELETE",
+      });
       alert("Dream Tale deleted successfully.");
       fetchDreamTales();
     } catch {
@@ -70,26 +70,26 @@ export default function DreamTalesPage() {
   };
 
   return (
-    <div className="bg-white rounded-xl border border-[#EBE6DA] shadow-sm overflow-hidden animate-fadeIn">
-      <div className="p-6 border-b border-[#EBE6DA] flex flex-col md:flex-row md:items-center justify-between gap-4 bg-gray-50/50">
+    <div className="bg-card rounded-xl border border-border shadow-sm overflow-hidden animate-fadeIn">
+      <div className="p-6 border-b border-border flex flex-col md:flex-row md:items-center justify-between gap-4 bg-muted/50">
         <div className="relative flex-1 max-w-md">
           <input
             type="text"
-            placeholder="Search local page..."
+            placeholder="Search dream tales..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-4 pr-10 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#5F7A68] text-sm bg-white"
+            className="w-full pl-4 pr-10 py-2 rounded-lg border border-border focus:outline-none focus:ring-2 focus:ring-primary text-sm bg-background text-foreground"
           />
           {searchQuery && (
             <button
               onClick={() => setSearchQuery("")}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 cursor-pointer p-1"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-white/70 hover:text-white cursor-pointer p-1"
             >
               <X className="h-4 w-4" />
             </button>
           )}
         </div>
-        <div className="text-xs text-gray-400 font-medium">
+        <div className="text-xs text-white/70 font-medium">
           {loading ? "" : `Total ${totalRecords} entries in database`}
         </div>
       </div>
@@ -101,7 +101,7 @@ export default function DreamTalesPage() {
       )}
 
       {loading ? (
-        <div className="py-20 flex flex-col items-center justify-center gap-3 text-gray-400">
+        <div className="py-20 flex flex-col items-center justify-center gap-3 text-white/70">
           <div className="animate-spin rounded-full h-8 w-8 border-2 border-t-transparent border-[#5F7A68]"></div>
           <span className="text-sm font-medium">Loading dream tales...</span>
         </div>
@@ -109,7 +109,7 @@ export default function DreamTalesPage() {
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse text-sm">
             <thead>
-              <tr className="bg-gray-50 border-b border-[#EBE6DA] text-xs font-semibold text-gray-400 uppercase tracking-wider">
+              <tr className="bg-muted/30 border-b border-border text-xs font-semibold uppercase tracking-wider">
                 <th className="px-6 py-4">Tale Details</th>
                 <th className="px-6 py-4">Configuration</th>
                 <th className="px-6 py-4">Associated Baby</th>
@@ -118,38 +118,62 @@ export default function DreamTalesPage() {
                 <th className="px-6 py-4 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#EBE6DA]">
+            <tbody className="divide-y divide-border">
               {dreamTales.filter(d =>
                 d.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
                 d.userName?.toLowerCase().includes(searchQuery.toLowerCase())
               ).map((d) => (
-                <tr key={d.id} className="hover:bg-gray-50/50 transition-colors">
+                <tr key={d.id} className="hover:bg-muted/70 transition-colors">
                   <td className="px-6 py-4">
-                    <div className="flex items-center gap-2">
-                      <span className="font-semibold text-gray-800">{d.title}</span>
-                      <div className="flex items-center gap-2">
-                        {d.isFavorite && <span className="text-amber-500 text-[10px] font-bold uppercase tracking-wider">★ Favorite</span>}
-                        {d.durationSeconds && <span className="text-gray-400 text-xs">| {Math.floor(d.durationSeconds / 60)}m {d.durationSeconds % 60}s</span>}
+                    <div className="flex items-center gap-4">
+                      <img
+                        src={`${getServerUrl()}${d.coverImageUrl}`}
+                        alt={d.title}
+                        className="w-16 h-16 rounded-lg object-cover border border-border shrink-0"
+                        onError={(e) => {
+                          e.currentTarget.src = "/placeholder-image.png";
+                        }}
+                      />
+
+                      <div className="min-w-0">
+                        <div className="font-semibold text-white line-clamp-2">
+                          {d.title}
+                        </div>
+
+                        <div className="mt-1 flex items-center gap-2 text-xs text-white/70">
+                          {d.isFavorite && (
+                            <span className="text-amber-400 font-semibold">
+                              ★ Favorite
+                            </span>
+                          )}
+
+                          {d.durationSeconds && (
+                            <span>
+                              {Math.floor(d.durationSeconds / 60)}m{" "}
+                              {d.durationSeconds % 60}s
+                            </span>
+                          )}
+                        </div>
                       </div>
                     </div>
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
-                      <span className="text-xs text-gray-500">Style: <span className="font-medium text-gray-700">{d.storyStyle}</span></span>
-                      <span className="text-xs text-gray-500">Voice: <span className="font-medium text-gray-700">{d.voiceName}</span></span>
-                      <span className="text-xs text-gray-500">Language: <span className="font-medium text-gray-700">{d.language}</span></span>
+                      <span className="text-xs text-white/70">Style: <span className="font-medium text-white">{d.storyStyle}</span></span>
+                      <span className="text-xs text-white/70">Voice: <span className="font-medium text-white">{d.voiceName}</span></span>
+                      <span className="text-xs text-white/70">Language: <span className="font-medium text-white">{d.language}</span></span>
                     </div>
                   </td>
                   <td className="px-6 py-4">
-                    <div className="font-medium text-gray-800">{d.babyName}</div>
+                    <div className="font-medium text-white">{d.babyName}</div>
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-2">
-                      <span className="font-medium text-gray-800">{d.userName}</span>
-                      <span className="text-xs text-gray-400">({d.userEmail})</span>
+                      <span className="font-medium text-white">{d.userName}</span>
+                      <span className="text-xs text-white/70">({d.userEmail})</span>
                     </div>
                   </td>
-                  <td className="px-6 py-4 text-xs text-gray-400">{formatDate(d.createdAt)}</td>
+                  <td className="px-6 py-4 text-xs text-white/70">{formatDate(d.createdAt)}</td>
                   <td className="px-6 py-4 text-right">
                     <button
                       onClick={() => deleteDreamTale(d.id)}
@@ -163,7 +187,7 @@ export default function DreamTalesPage() {
               ))}
               {dreamTales.length === 0 && (
                 <tr>
-                  <td colSpan={6} className="px-6 py-8 text-center text-gray-400">
+                  <td colSpan={6} className="px-6 py-8 text-center text-white/70">
                     No dream tales found.
                   </td>
                 </tr>
@@ -178,7 +202,7 @@ export default function DreamTalesPage() {
         totalPages={totalPages}
         onPageChange={setPage}
       />
-      
+
       <ConfirmDialog
         open={confirmOpen}
         title="Delete Dream Tale"

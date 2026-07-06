@@ -2,24 +2,21 @@ import express from 'express';
 import cors from 'cors';
 import { pool } from './db.js';
 
+console.log("⚡ [Server]: RUNNING INTEGRATED DASHBOARD BACKEND");
+
 const app = express();
-app.use(cors());
+
+app.use(cors({
+  origin: true,
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"]
+}));
 app.use(express.json());
 
-// ── Health ────────────────────────────────────────────────────────────────────
-app.get('/api/health', async (_req, res) => {
+// 1. Fully Integrated Overview & Growth Charts Endpoint
+app.get('/api/overview', async (_req, res) => {
   try {
-    await pool.query('SELECT 1');
-    res.json({ status: 'ok', db: 'connected' });
-  } catch (e) {
-    res.status(500).json({ status: 'error', error: String(e) });
-  }
-});
-
-// ── Admin Overview (Dashboard) ────────────────────────────────────────────────
-// Returns: { counts, charts: { userGrowth, memoryGrowth }, dbStatus }
-app.get('/api/admin/overview', async (_req, res) => {
-  try {
+    console.log("⚡ [DB]: Gathering overview matrix and analytics...");
     const [users, babies, memories, comments, reactions, dreamTales, invites] = await Promise.all([
       pool.query('SELECT COUNT(*) as count FROM users'),
       pool.query('SELECT COUNT(*) as count FROM babies'),
@@ -30,7 +27,7 @@ app.get('/api/admin/overview', async (_req, res) => {
       pool.query('SELECT COUNT(*) as count FROM invites'),
     ]);
 
-    // Growth charts: daily count for last 30 days
+    // Aggregate daily counts for the charts layout
     const [userGrowthRaw, memoryGrowthRaw] = await Promise.all([
       pool.query(`
         SELECT DATE(created_at)::text as date, COUNT(*) as count
@@ -48,15 +45,6 @@ app.get('/api/admin/overview', async (_req, res) => {
       `),
     ]);
 
-    const poolState = pool as any;
-    const dbStatus = {
-      host: 'ep-cool-unit-aqqnyxc1.c-8.us-east-1.aws.neon.tech',
-      database: 'neondb',
-      connected: true,
-      poolLimit: poolState.options?.max ?? 10,
-      memoryUsage: process.memoryUsage(),
-    };
-
     res.json({
       counts: {
         users: Number(users.rows[0].count),
@@ -71,15 +59,15 @@ app.get('/api/admin/overview', async (_req, res) => {
         userGrowth: userGrowthRaw.rows.map(r => ({ date: r.date, count: Number(r.count) })),
         memoryGrowth: memoryGrowthRaw.rows.map(r => ({ date: r.date, count: Number(r.count) })),
       },
-      dbStatus,
+      dbStatus: { connected: true }
     });
   } catch (e) {
     res.status(500).json({ error: String(e) });
   }
 });
 
-// ── Admin: Users ──────────────────────────────────────────────────────────────
-app.get('/api/admin/users', async (req, res) => {
+// 2. Paginated Users Endpoint
+app.get('/api/users', async (req, res) => {
   try {
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 10;
@@ -106,27 +94,8 @@ app.get('/api/admin/users', async (req, res) => {
   }
 });
 
-app.patch('/api/admin/users/:id/admin', async (req, res) => {
-  try {
-    const { isAdmin } = req.body;
-    await pool.query('UPDATE users SET is_admin = $1 WHERE id = $2', [isAdmin, req.params.id]);
-    res.json({ success: true });
-  } catch (e) {
-    res.status(500).json({ error: String(e) });
-  }
-});
-
-app.delete('/api/admin/users/:id', async (req, res) => {
-  try {
-    await pool.query('DELETE FROM users WHERE id = $1', [req.params.id]);
-    res.json({ success: true });
-  } catch (e) {
-    res.status(500).json({ error: String(e) });
-  }
-});
-
-// ── Admin: Babies ─────────────────────────────────────────────────────────────
-app.get('/api/admin/babies', async (req, res) => {
+// 3. Paginated Babies Endpoint
+app.get('/api/babies', async (req, res) => {
   try {
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 10;
@@ -152,17 +121,8 @@ app.get('/api/admin/babies', async (req, res) => {
   }
 });
 
-app.delete('/api/admin/babies/:id', async (req, res) => {
-  try {
-    await pool.query('DELETE FROM babies WHERE id = $1', [req.params.id]);
-    res.json({ success: true });
-  } catch (e) {
-    res.status(500).json({ error: String(e) });
-  }
-});
-
-// ── Admin: Memories ───────────────────────────────────────────────────────────
-app.get('/api/admin/memories', async (req, res) => {
+// 4. Paginated Memories Endpoint
+app.get('/api/memories', async (req, res) => {
   try {
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 10;
@@ -191,17 +151,8 @@ app.get('/api/admin/memories', async (req, res) => {
   }
 });
 
-app.delete('/api/admin/memories/:id', async (req, res) => {
-  try {
-    await pool.query('DELETE FROM memories WHERE id = $1', [req.params.id]);
-    res.json({ success: true });
-  } catch (e) {
-    res.status(500).json({ error: String(e) });
-  }
-});
-
-// ── Admin: Invites ────────────────────────────────────────────────────────────
-app.get('/api/admin/invites', async (req, res) => {
+// 5. Paginated Invites Endpoint
+app.get('/api/invites', async (req, res) => {
   try {
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 10;
@@ -224,17 +175,8 @@ app.get('/api/admin/invites', async (req, res) => {
   }
 });
 
-app.delete('/api/admin/invites/:id', async (req, res) => {
-  try {
-    await pool.query('DELETE FROM invites WHERE id = $1', [req.params.id]);
-    res.json({ success: true });
-  } catch (e) {
-    res.status(500).json({ error: String(e) });
-  }
-});
-
-// ── Admin: Dream Tales ────────────────────────────────────────────────────────
-app.get('/api/admin/dream-tales', async (req, res) => {
+// 6. Paginated Dream Tales Endpoint
+app.get('/api/dream-tales', async (req, res) => {
   try {
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 10;
@@ -261,18 +203,9 @@ app.get('/api/admin/dream-tales', async (req, res) => {
   }
 });
 
-app.delete('/api/admin/dream-tales/:id', async (req, res) => {
-  try {
-    await pool.query('DELETE FROM dream_tales WHERE id = $1', [req.params.id]);
-    res.json({ success: true });
-  } catch (e) {
-    res.status(500).json({ error: String(e) });
-  }
+const PORT = 5001;
+const server = app.listen(PORT, () => {
+  console.log(`🚀 [Server]: Listening on port ${PORT}`);
 });
 
-// ─────────────────────────────────────────────────────────────────────────────
-const PORT = process.env.PORT || 5001;
-app.listen(PORT, () => {
-  console.log(`Server listening on port ${PORT}`);
-});
-
+setInterval(() => { }, 1000 * 60 * 60);

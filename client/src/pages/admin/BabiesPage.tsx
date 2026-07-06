@@ -2,12 +2,10 @@ import React, { useState, useEffect } from "react";
 import { Trash2, X } from "lucide-react";
 import { PaginationControls } from "../../components/ui/PaginationControls";
 import { ConfirmDialog } from "../../components/ConfirmDialog";
-
-const API_URL_STORAGE_KEY = "kinstory_admin_api_url";
-const DEFAULT_API_URL = "http://localhost:5001/api";
+import { apiFetch } from "../../lib/api";
 
 export default function BabiesPage() {
-  const [apiUrl] = useState(() => localStorage.getItem(API_URL_STORAGE_KEY) || DEFAULT_API_URL);
+
   const [babies, setBabies] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
@@ -22,13 +20,15 @@ export default function BabiesPage() {
 
   const fetchBabies = async () => {
     setLoading(true);
+
     try {
-      const res = await fetch(`${apiUrl}/admin/babies?page=${page}&limit=10`);
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const data = await res.json();
-      setBabies(data.data);
-      setTotalPages(data.totalPages);
-      setTotalRecords(data.total);
+      const data = await apiFetch<any>(
+        `/babies?page=${page}&limit=10`
+      );
+
+      setBabies(data.data ?? []);
+      setTotalPages(data.totalPages ?? 1);
+      setTotalRecords(data.total ?? 0);
       setError(null);
     } catch (err) {
       console.error(err);
@@ -40,7 +40,7 @@ export default function BabiesPage() {
 
   useEffect(() => {
     fetchBabies();
-  }, [apiUrl, page]);
+  }, [page]);
 
   const deleteBaby = (babyId: string) => {
     setConfirmingId(babyId);
@@ -50,8 +50,9 @@ export default function BabiesPage() {
   const handleConfirmDelete = async () => {
     if (!confirmingId) return;
     try {
-      const res = await fetch(`${apiUrl}/admin/babies/${confirmingId}`, { method: "DELETE" });
-      if (!res.ok) throw new Error();
+      await apiFetch(`/babies/${confirmingId}`, {
+        method: "DELETE",
+      });
       alert("Baby profile deleted successfully.");
       fetchBabies();
     } catch {
@@ -70,48 +71,48 @@ export default function BabiesPage() {
   };
 
   return (
-    <div className="bg-white rounded-xl border border-[#EBE6DA] shadow-sm overflow-hidden animate-fadeIn">
+    <div className="bg-card rounded-xl border border-border shadow-sm overflow-hidden animate-fadeIn">
       {/* Table search & filter header */}
-      <div className="p-6 border-b border-[#EBE6DA] flex flex-col md:flex-row md:items-center justify-between gap-4 bg-gray-50/50">
+      <div className="p-6 border-b border-border flex flex-col md:flex-row md:items-center justify-between gap-4 bg-muted/50">
         <div className="relative flex-1 max-w-md">
           <input
             type="text"
-            placeholder="Search local page..."
+            placeholder="Search babies..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-4 pr-10 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#5F7A68] text-sm bg-white"
+            className="w-full pl-4 pr-10 py-2 rounded-lg border border-border focus:outline-none focus:ring-2 focus:ring-primary text-sm bg-background text-foreground"
           />
           {searchQuery && (
             <button
               onClick={() => setSearchQuery("")}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 cursor-pointer p-1"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-white/70 hover:text-white cursor-pointer p-1"
             >
               <X className="h-4 w-4" />
             </button>
           )}
         </div>
-        <div className="text-xs text-gray-400 font-medium">
+        <div className="text-xs text-white/70 font-medium">
           {loading ? "" : `Total ${totalRecords} entries in database`}
         </div>
       </div>
 
       {error && (
-        <div className="p-6 text-rose-600 bg-rose-50 border-b border-rose-100 text-sm">
+        <div className="p-6 text-destructive-foreground bg-destructive/10 border-b border-destructive/20 text-sm">
           {error}
         </div>
       )}
 
       {/* Table Area */}
       {loading ? (
-        <div className="py-20 flex flex-col items-center justify-center gap-3 text-gray-400">
-          <div className="animate-spin rounded-full h-8 w-8 border-2 border-t-transparent border-[#5F7A68]"></div>
+        <div className="py-20 flex flex-col items-center justify-center gap-3 text-muted-foreground">
+          <div className="animate-spin rounded-full h-8 w-8 border-2 border-t-transparent border-primary"></div>
           <span className="text-sm font-medium">Loading babies...</span>
         </div>
       ) : (
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse text-sm">
             <thead>
-              <tr className="bg-gray-50 border-b border-[#EBE6DA] text-xs font-semibold text-gray-400 uppercase tracking-wider">
+              <tr className="bg-muted/30 border-b border-border text-xs font-semibold uppercase tracking-wider">
                 <th className="px-6 py-4">Photo</th>
                 <th className="px-6 py-4">Baby Details</th>
                 <th className="px-6 py-4">Birth Date</th>
@@ -120,14 +121,14 @@ export default function BabiesPage() {
                 <th className="px-6 py-4 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#EBE6DA]">
+            <tbody className="divide-y divide-border">
               {babies.filter(b =>
                 b.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
                 b.parentEmail?.toLowerCase().includes(searchQuery.toLowerCase())
               ).map((b) => (
-                <tr key={b.id} className="hover:bg-gray-50/50 transition-colors">
+                <tr key={b.id} className="hover:bg-muted/70 transition-colors">
                   <td className="px-6 py-4">
-                    <img 
+                    <img
                       src={b.profilePhoto}
                       alt={b.name}
                       width={48}
@@ -141,19 +142,19 @@ export default function BabiesPage() {
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-2">
-                      <span className="font-semibold text-gray-800">{b.name}</span>
+                      <span className="font-semibold text-white">{b.name}</span>
                     </div>
                   </td>
-                  <td className="px-6 py-4 text-xs font-semibold text-gray-600">
+                  <td className="px-6 py-4 text-xs font-semibold text-white/80">
                     {b.dob ? new Date(b.dob).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" }) : "-"}
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-2">
-                      <span className="font-medium text-gray-700">{b.parentName || "Unknown parent"}</span>
-                      <span className="text-xs text-gray-400 font-mono">({b.parentEmail})</span>
+                      <span className="font-medium text-white">{b.parentName || "Unknown parent"}</span>
+                      <span className="text-xs text-white/70 font-mono">({b.parentEmail})</span>
                     </div>
                   </td>
-                  <td className="px-6 py-4 font-semibold text-gray-600 px-8">{b.memoryCount}</td>
+                  <td className=" py-4 font-semibold text-white/80 px-8">{b.memoryCount}</td>
                   <td className="px-6 py-4 text-right">
                     <button
                       onClick={() => deleteBaby(b.id)}
@@ -167,7 +168,7 @@ export default function BabiesPage() {
               ))}
               {babies.length === 0 && (
                 <tr>
-                  <td colSpan={6} className="px-6 py-8 text-center text-gray-400">
+                  <td colSpan={6} className="px-6 py-8 text-center text-white/70">
                     No babies found.
                   </td>
                 </tr>
@@ -183,7 +184,7 @@ export default function BabiesPage() {
         totalPages={totalPages}
         onPageChange={setPage}
       />
-      
+
       <ConfirmDialog
         open={confirmOpen}
         title="Delete Baby Profile"

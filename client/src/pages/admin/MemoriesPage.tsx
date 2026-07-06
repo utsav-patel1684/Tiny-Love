@@ -2,12 +2,9 @@ import React, { useState, useEffect } from "react";
 import { Trash2, ExternalLink, X } from "lucide-react";
 import { PaginationControls } from "../../components/ui/PaginationControls";
 import { ConfirmDialog } from "../../components/ConfirmDialog";
-
-const API_URL_STORAGE_KEY = "kinstory_admin_api_url";
-const DEFAULT_API_URL = "http://localhost:5001/api";
-
+import { apiFetch } from "../../lib/api";
 export default function MemoriesPage() {
-  const [apiUrl] = useState(() => localStorage.getItem(API_URL_STORAGE_KEY) || DEFAULT_API_URL);
+
   const [memories, setMemories] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
@@ -22,13 +19,15 @@ export default function MemoriesPage() {
 
   const fetchMemories = async () => {
     setLoading(true);
+
     try {
-      const res = await fetch(`${apiUrl}/admin/memories?page=${page}&limit=10`);
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const data = await res.json();
-      setMemories(data.data);
-      setTotalPages(data.totalPages);
-      setTotalRecords(data.total);
+      const data = await apiFetch<any>(
+        `/memories?page=${page}&limit=10`
+      );
+
+      setMemories(data.data ?? []);
+      setTotalPages(data.totalPages ?? 1);
+      setTotalRecords(data.total ?? 0);
       setError(null);
     } catch (err) {
       console.error(err);
@@ -40,7 +39,7 @@ export default function MemoriesPage() {
 
   useEffect(() => {
     fetchMemories();
-  }, [apiUrl, page]);
+  }, [page]);
 
   const deleteMemory = (memoryId: string) => {
     setConfirmingId(memoryId);
@@ -50,8 +49,9 @@ export default function MemoriesPage() {
   const handleConfirmDelete = async () => {
     if (!confirmingId) return;
     try {
-      const res = await fetch(`${apiUrl}/admin/memories/${confirmingId}`, { method: "DELETE" });
-      if (!res.ok) throw new Error();
+      await apiFetch(`/memories/${confirmingId}`, {
+        method: "DELETE",
+      });
       alert("Memory deleted successfully.");
       fetchMemories();
     } catch {
@@ -70,26 +70,26 @@ export default function MemoriesPage() {
   };
 
   return (
-    <div className="bg-white rounded-xl border border-[#EBE6DA] shadow-sm overflow-hidden animate-fadeIn">
-      <div className="p-6 border-b border-[#EBE6DA] flex flex-col md:flex-row md:items-center justify-between gap-4 bg-gray-50/50">
+    <div className="bg-card rounded-xl border border-border shadow-sm overflow-hidden animate-fadeIn">
+      <div className="p-6 border-b border-border flex flex-col md:flex-row md:items-center justify-between gap-4 bg-muted/50">
         <div className="relative flex-1 max-w-md">
           <input
             type="text"
-            placeholder="Search local page..."
+            placeholder="Search memories..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-4 pr-10 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#5F7A68] text-sm bg-white"
+            className="w-full pl-4 pr-10 py-2 rounded-lg border border-border focus:outline-none focus:ring-2 focus:ring-primary text-sm bg-background text-foreground"
           />
           {searchQuery && (
             <button
               onClick={() => setSearchQuery("")}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 cursor-pointer p-1"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-white/70 hover:text-white cursor-pointer p-1"
             >
               <X className="h-4 w-4" />
             </button>
           )}
         </div>
-        <div className="text-xs text-gray-400 font-medium">
+        <div className="text-xs text-white/70 font-medium">
           {loading ? "" : `Total ${totalRecords} entries in database`}
         </div>
       </div>
@@ -101,7 +101,7 @@ export default function MemoriesPage() {
       )}
 
       {loading ? (
-        <div className="py-20 flex flex-col items-center justify-center gap-3 text-gray-400">
+        <div className="py-20 flex flex-col items-center justify-center gap-3 text-white/70">
           <div className="animate-spin rounded-full h-8 w-8 border-2 border-t-transparent border-[#5F7A68]"></div>
           <span className="text-sm font-medium">Loading memories...</span>
         </div>
@@ -109,7 +109,7 @@ export default function MemoriesPage() {
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse text-sm">
             <thead>
-              <tr className="bg-gray-50 border-b border-[#EBE6DA] text-xs font-semibold text-gray-400 uppercase tracking-wider">
+              <tr className="bg-muted/30 border-b border-border text-xs font-semibold uppercase tracking-wider">
                 <th className="px-6 py-4">Memory Content</th>
                 <th className="px-6 py-4">Attachment / Type</th>
                 <th className="px-6 py-4">Owner & Baby</th>
@@ -118,27 +118,27 @@ export default function MemoriesPage() {
                 <th className="px-6 py-4 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#EBE6DA]">
+            <tbody className="divide-y divide-border">
               {memories.filter(m =>
                 m.caption?.toLowerCase().includes(searchQuery.toLowerCase()) ||
                 m.uploaderEmail?.toLowerCase().includes(searchQuery.toLowerCase())
               ).map((m) => (
-                <tr key={m.id} className="hover:bg-gray-50/50 transition-colors">
+                <tr key={m.id} className="hover:bg-muted/70 transition-colors">
                   <td className="px-6 py-4 max-w-xs">
-                    <div className="font-semibold text-gray-800 truncate" title={m.caption}>
-                      {m.caption || <span className="a text-gray-400">No caption</span>}
+                    <div className="font-semibold text-white truncate" title={m.caption}>
+                      {m.caption || <span className="a text-white/70">No caption</span>}
                     </div>
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-2">
-                      <span className={`inline-block px-2 py-0.5 rounded text-[10px] font-bold ${m.type === "photo" ? "bg-blue-50 text-blue-700" :
-                          m.type === "video" ? "bg-amber-50 text-amber-700" :
-                            "bg-emerald-50 text-emerald-700"
+                      <span className={`inline-block px-2 py-0.5 rounded text-[10px] font-bold ${m.type === "photo" ? "bg-white/10 text-white" :
+                        m.type === "video" ? "bg-white/10 text-white" :
+                          "bg-white/10 text-white"
                         }`}>
                         {m.type}
                       </span>
                       {m.mediaUrl && (
-                        <a href={m.mediaUrl} target="_blank" rel="noreferrer" className="text-gray-400 hover:text-gray-600 flex items-center gap-0.5 text-xs">
+                        <a href={m.mediaUrl} target="_blank" rel="noreferrer" className="text-white/70 hover:text-white flex items-center gap-0.5 text-xs">
                           Link <ExternalLink className="h-3 w-3" />
                         </a>
                       )}
@@ -146,17 +146,17 @@ export default function MemoriesPage() {
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-2">
-                      <span className="font-semibold text-gray-800">Baby: {m.babyName || "Unknown"}</span>
-                      <span className="text-xs text-gray-400">| By: {m.uploaderName} </span>
+                      <span className="font-semibold text-white">Baby: {m.babyName || "Unknown"}</span>
+                      <span className="text-xs text-white/70">| By: {m.uploaderName} </span>
                     </div>
                   </td>
-                  <td className="px-6 py-4 text-xs font-semibold text-gray-500">
+                  <td className="px-6 py-4 text-xs font-semibold text-white/70">
                     <div className="flex items-center gap-3">
                       <span>Comments: {m.commentCount}</span>
                       <span>Reactions: {m.reactionCount}</span>
                     </div>
                   </td>
-                  {/* <td className="px-6 py-4 text-xs text-gray-400">{formatDate(m.createdAt)}</td> */}
+                  {/* <td className="px-6 py-4 text-xs text-white/70">{formatDate(m.createdAt)}</td> */}
                   <td className="px-6 py-4 text-right">
                     <button
                       onClick={() => deleteMemory(m.id)}
@@ -170,7 +170,7 @@ export default function MemoriesPage() {
               ))}
               {memories.length === 0 && (
                 <tr>
-                  <td colSpan={6} className="px-6 py-8 text-center text-gray-400">
+                  <td colSpan={6} className="px-6 py-8 text-center text-white/70">
                     No memories found.
                   </td>
                 </tr>
@@ -185,7 +185,7 @@ export default function MemoriesPage() {
         totalPages={totalPages}
         onPageChange={setPage}
       />
-      
+
       <ConfirmDialog
         open={confirmOpen}
         title="Delete Memory"

@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import TinyLogo from "../../../src/public/Tiny.png";
 import { Link, Outlet, useLocation } from "react-router-dom";
 import {
   Users,
@@ -37,19 +38,18 @@ export default function AdminLayout() {
   ];
 
   return (
-    <div className="flex h-screen bg-[#FDFBF7] text-gray-800 font-sans">
+    <div className="flex h-screen bg-background text-foreground font-sans">
       {/* Sidebar */}
-      <aside className={`${isCollapsed ? 'w-20' : 'w-64'} bg-[#1E2E24] text-white flex flex-col shadow-2xl border-r border-[#EBE6DA]/10 h-screen sticky top-0 transition-all duration-300 overflow-hidden`}>
+      <aside className={`${isCollapsed ? 'w-20' : 'w-57'} bg-sidebar text-sidebar-foreground flex flex-col shadow-2xl border-r border-sidebar-border/10 h-screen sticky top-0 transition-all duration-300 overflow-hidden`}>
         <div className="flex-1 flex flex-col">
           {/* Brand Header */}
-          <div className={`h-20 flex items-center border-b border-[#EBE6DA]/10 transition-all duration-300 ${isCollapsed ? 'justify-center px-0' : 'px-6'}`}>
+          <div className={`h-20 flex items-center border-b border-border/30 transition-all duration-300 ${isCollapsed ? 'justify-center px-0' : 'px-6'}`}>
             <div className={`flex items-center transition-all duration-300 ${isCollapsed ? 'justify-center' : 'gap-3'}`}>
-              <div className="h-9 w-9 bg-[#C9AE7B] rounded-lg flex items-center justify-center font-bold text-white shadow-md flex-shrink-0">
-                T
+              <div className="h-12 w-12 rounded-xl overflow-hidden bg-[#E1A53D] flex items-center justify-center shadow-md flex-shrink-0">
+                <img src={TinyLogo} alt="Tiny Love logo" className="h-full w-full object-cover" />
               </div>
-              <div className={`flex flex-col transition-all duration-300 whitespace-nowrap ${isCollapsed ? 'opacity-0 w-0 overflow-hidden ml-0' : 'opacity-100 w-auto ml-3'}`}>
-                <h1 className="font-semibold text-lg tracking-wider">Tiny Love</h1>
-                <span className="text-[#C9AE7B] text-xs font-semibold uppercase tracking-widest">Admin Control</span>
+              <div className={`flex flex-col transition-all duration-300 whitespace-nowrap ${isCollapsed ? 'opacity-0 w-0 overflow-hidden ml-0' : 'opacity-100 w-auto ml-2'}`}>
+                <h1 className="font-semibold text-lg tracking-wider text-white">Tiny Love</h1>
               </div>
             </div>
           </div>
@@ -63,11 +63,10 @@ export default function AdminLayout() {
                   key={item.path}
                   to={item.path}
                   title={isCollapsed ? item.label : undefined}
-                  className={`w-full flex items-center h-11 ${isCollapsed ? 'justify-center px-0' : 'px-4'} rounded-lg text-sm font-medium transition-all duration-200 group cursor-pointer ${
-                    isActive
-                      ? "bg-[#C9AE7B] text-white shadow-md"
-                      : "text-[#EBE6DA]/75 hover:bg-[#C9AE7B]/10 hover:text-white"
-                  }`}
+                  className={`w-full flex items-center h-11 ${isCollapsed ? 'justify-center px-0' : 'px-4'} rounded-lg text-sm font-medium transition-all duration-200 group cursor-pointer ${isActive
+                    ? "bg-[#E1A53D] text-black shadow-md"
+                    : "text-sidebar-foreground/75 hover:bg-accent/10 hover:text-accent-foreground"
+                    }`}
                 >
                   <div className={`flex items-center justify-center transition-all duration-200 ${isCollapsed ? 'w-full' : 'w-4'}`}>
                     <item.icon className="h-4 w-4 flex-shrink-0 group-hover:scale-110 transition-transform" />
@@ -83,26 +82,28 @@ export default function AdminLayout() {
       </aside>
 
       {/* Main Content Area */}
-      <main className="flex-1 flex flex-col overflow-y-auto">
+      <main className="flex-1 flex flex-col overflow-hidden">
         {/* Top Header */}
-        <header className="shrink-0 h-20 bg-white border-b border-[#EBE6DA] px-8 flex items-center justify-between sticky top-0 z-40">
+        <header className="shrink-0 h-20 bg-card border-b border-border px-8 flex items-center justify-between sticky top-0 z-40">
           <div className="flex items-center gap-4">
             <button
               onClick={() => setIsCollapsed(!isCollapsed)}
-              className="p-2 -ml-2 text-gray-500 hover:text-gray-800 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer"
+              className="p-2 -ml-2 text-sidebar-foreground/80 hover:text-sidebar-foreground rounded-lg hover:bg-muted/50 transition-colors cursor-pointer"
               title={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
             >
               {isCollapsed ? <PanelLeft className="h-5 w-5" /> : <PanelLeftClose className="h-5 w-5" />}
             </button>
-            <h2 className="text-xl font-semibold capitalize text-gray-800 border-l border-gray-200 pl-4">
+            <h2 className="text-xl font-semibold capitalize text-foreground border-l border-border pl-4">
               {getPageTitle()}
             </h2>
           </div>
         </header>
 
         {/* Page Content Outlet */}
-        <div className="p-8 max-w-7xl w-full mx-auto space-y-8">
-          <Outlet />
+        <div className="flex-1 overflow-y-auto">
+          <div className="p-8 max-w-7xl w-full mx-auto space-y-8">
+            <Outlet />
+          </div>
         </div>
       </main>
     </div>
