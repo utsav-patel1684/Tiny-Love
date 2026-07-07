@@ -2,7 +2,9 @@ import React, { useState, useEffect } from "react";
 import { Trash2, X } from "lucide-react";
 import { PaginationControls } from "../../components/ui/PaginationControls";
 import { ConfirmDialog } from "../../components/ConfirmDialog";
+import { Skeleton } from "../../components/ui/skeleton";
 import { apiFetch } from "../../lib/api";
+import avtar from "../../public/default.jpg";
 
 export default function BabiesPage() {
 
@@ -73,26 +75,26 @@ export default function BabiesPage() {
   return (
     <div className="bg-card rounded-xl border border-border shadow-sm overflow-hidden animate-fadeIn">
       {/* Table search & filter header */}
-      <div className="p-6 border-b border-border flex flex-col md:flex-row md:items-center justify-between gap-4 bg-muted/50">
-        <div className="relative flex-1 max-w-md">
+      <div className="p-4 md:p-6 border-b border-border flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="relative text-white flex-1 max-w-md">
           <input
             type="text"
             placeholder="Search babies..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-4 pr-10 py-2 rounded-lg border border-border focus:outline-none focus:ring-2 focus:ring-primary text-sm bg-background text-foreground"
+            className="w-full pl-4 pr-10 py-2 rounded-lg border border-border focus:outline-none focus:ring-2 focus:ring-primary text-sm bg-background text-white"
           />
           {searchQuery && (
             <button
               onClick={() => setSearchQuery("")}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-white/70 hover:text-white cursor-pointer p-1"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-white hover:text-white cursor-pointer p-1"
             >
               <X className="h-4 w-4" />
             </button>
           )}
         </div>
-        <div className="text-xs text-white/70 font-medium">
-          {loading ? "" : `Total ${totalRecords} entries in database`}
+        <div className="text-xs text-white font-medium">
+          {loading ? "" : `Total ${totalRecords} Records.`}
         </div>
       </div>
 
@@ -104,16 +106,16 @@ export default function BabiesPage() {
 
       {/* Table Area */}
       {loading ? (
-        <div className="py-20 flex flex-col items-center justify-center gap-3 text-muted-foreground">
-          <div className="animate-spin rounded-full h-8 w-8 border-2 border-t-transparent border-primary"></div>
-          <span className="text-sm font-medium">Loading babies...</span>
+        <div className="py-10 space-y-4 w-full">
+          {[1, 2, 3, 4, 5, 6].map((i) => (
+            <Skeleton key={i} className="h-14 w-full rounded-md" />
+          ))}
         </div>
       ) : (
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse text-sm">
+        <div className="overflow-x-auto w-full">
+          <table className="w-full min-w-[800px] text-left border-collapse text-sm">
             <thead>
-              <tr className="bg-muted/30 border-b border-border text-xs font-semibold uppercase tracking-wider">
-                <th className="px-6 py-4">Photo</th>
+              <tr className="border-b border-border text-xs font-semibold uppercase tracking-wider">
                 <th className="px-6 py-4">Baby Details</th>
                 <th className="px-6 py-4">Birth Date</th>
                 <th className="px-6 py-4">Parent Details</th>
@@ -128,21 +130,19 @@ export default function BabiesPage() {
               ).map((b) => (
                 <tr key={b.id} className="hover:bg-muted/70 transition-colors">
                   <td className="px-6 py-4">
-                    <img
-                      src={b.profilePhoto}
-                      alt={b.name}
-                      width={48}
-                      height={48}
-                      style={{
-                        borderRadius: "50%",
-                        objectFit: "cover",
-                        border: "1px solid #e5e7eb"
-                      }}
-                    />
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-2">
-                      <span className="font-semibold text-white">{b.name}</span>
+                    <div className="flex items-center gap-3">
+                      <img
+                        src={b.profilePhoto?.trim() || avtar}
+                        alt={b.name || "Baby avatar"}
+                        className="w-10 h-10 rounded-full object-cover border border-white/20 shrink-0"
+                        onError={(e) => {
+                          e.currentTarget.onerror = null;
+                          e.currentTarget.src = avtar;
+                        }}
+                      />
+                      <div className="flex flex-col">
+                        <span className="font-semibold text-white">{b.name}</span>
+                      </div>
                     </div>
                   </td>
                   <td className="px-6 py-4 text-xs font-semibold text-white/80">
@@ -151,7 +151,7 @@ export default function BabiesPage() {
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-2">
                       <span className="font-medium text-white">{b.parentName || "Unknown parent"}</span>
-                      <span className="text-xs text-white/70 font-mono">({b.parentEmail})</span>
+                      {/* <span className="text-xs text-white/70 font-mono">({b.parentEmail})</span> */}
                     </div>
                   </td>
                   <td className=" py-4 font-semibold text-white/80 px-8">{b.memoryCount}</td>
@@ -168,7 +168,7 @@ export default function BabiesPage() {
               ))}
               {babies.length === 0 && (
                 <tr>
-                  <td colSpan={6} className="px-6 py-8 text-center text-white/70">
+                  <td colSpan={5} className="px-6 py-8 text-center text-white/70">
                     No babies found.
                   </td>
                 </tr>

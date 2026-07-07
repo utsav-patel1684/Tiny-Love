@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Trash2, ExternalLink, X } from "lucide-react";
 import { PaginationControls } from "../../components/ui/PaginationControls";
 import { ConfirmDialog } from "../../components/ConfirmDialog";
+import { Skeleton } from "../../components/ui/skeleton";
 import { apiFetch } from "../../lib/api";
 export default function MemoriesPage() {
 
@@ -71,7 +72,7 @@ export default function MemoriesPage() {
 
   return (
     <div className="bg-card rounded-xl border border-border shadow-sm overflow-hidden animate-fadeIn">
-      <div className="p-6 border-b border-border flex flex-col md:flex-row md:items-center justify-between gap-4 bg-muted/50">
+      <div className="p-4 md:p-6 border-b border-border flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="relative flex-1 max-w-md">
           <input
             type="text"
@@ -89,30 +90,31 @@ export default function MemoriesPage() {
             </button>
           )}
         </div>
-        <div className="text-xs text-white/70 font-medium">
-          {loading ? "" : `Total ${totalRecords} entries in database`}
+        <div className="text-xs text-white font-medium">
+          {loading ? "" : `Total ${totalRecords} Records.`}
         </div>
       </div>
-
       {error && (
-        <div className="p-6 text-rose-600 bg-rose-50 border-b border-rose-100 text-sm">
+        <div className="p-4 md:p-6 text-rose-600 bg-rose-50 border-b border-rose-100 text-sm">
           {error}
         </div>
       )}
 
       {loading ? (
-        <div className="py-20 flex flex-col items-center justify-center gap-3 text-white/70">
-          <div className="animate-spin rounded-full h-8 w-8 border-2 border-t-transparent border-[#5F7A68]"></div>
-          <span className="text-sm font-medium">Loading memories...</span>
+        <div className="py-10 space-y-4 w-full">
+          {[1, 2, 3, 4, 5, 6].map((i) => (
+            <Skeleton key={i} className="h-14 w-full rounded-md" />
+          ))}
         </div>
       ) : (
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse text-sm">
+        <div className="overflow-x-auto w-full">
+          <table className="w-full min-w-[800px] text-left border-collapse text-sm">
             <thead>
-              <tr className="bg-muted/30 border-b border-border text-xs font-semibold uppercase tracking-wider">
+              <tr className="border-b border-border text-xs font-semibold uppercase tracking-wider">
                 <th className="px-6 py-4">Memory Content</th>
-                <th className="px-6 py-4">Attachment / Type</th>
-                <th className="px-6 py-4">Owner & Baby</th>
+                <th className="px-6 py-4">Type</th>
+                <th className="px-6 py-4">Owner</th>
+                <th className="px-6 py-4">Baby</th>
                 <th className="px-6 py-4">Engagement</th>
                 {/* <th className="px-6 py-4">Created At</th> */}
                 <th className="px-6 py-4 text-right">Actions</th>
@@ -126,7 +128,7 @@ export default function MemoriesPage() {
                 <tr key={m.id} className="hover:bg-muted/70 transition-colors">
                   <td className="px-6 py-4 max-w-xs">
                     <div className="font-semibold text-white truncate" title={m.caption}>
-                      {m.caption || <span className="a text-white/70">No caption</span>}
+                      {m.caption || <span className="a text-white">No caption</span>}
                     </div>
                   </td>
                   <td className="px-6 py-4">
@@ -145,12 +147,15 @@ export default function MemoriesPage() {
                     </div>
                   </td>
                   <td className="px-6 py-4">
-                    <div className="flex items-center gap-2">
-                      <span className="font-semibold text-white">Baby: {m.babyName || "Unknown"}</span>
-                      <span className="text-xs text-white/70">| By: {m.uploaderName} </span>
+                    <div className="flex flex-row ">
+                      <span className="font-semibold text-white">{m.uploaderName || "Unknown"}</span>
+                      {/* <span className="text-xs text-white/70 font-mono">{m.uploaderEmail}</span> */}
                     </div>
                   </td>
-                  <td className="px-6 py-4 text-xs font-semibold text-white/70">
+                  <td className="px-6 py-4">
+                    <span className="font-semibold text-white">{m.babyName || "Unknown"}</span>
+                  </td>
+                  <td className="px-6 py-4 text-xs font-semibold text-white">
                     <div className="flex items-center gap-3">
                       <span>Comments: {m.commentCount}</span>
                       <span>Reactions: {m.reactionCount}</span>

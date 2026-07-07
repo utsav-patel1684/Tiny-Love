@@ -29,7 +29,7 @@ export default function Dashboard() {
 
   if (error) {
     return (
-      <div className="bg-destructive/10 p-6 rounded-xl border border-destructive/20">
+      <div className="bg-destructive/10 p-4 md:p-6 rounded-xl border border-destructive/20">
         <h3 className="text-destructive font-bold mb-2">Connection Error</h3>
         <p className="text-destructive-foreground">{error}</p>
       </div>
@@ -40,7 +40,7 @@ export default function Dashboard() {
     <div className="space-y-8 animate-fadeIn">
       {/* Stats overview cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <div className="bg-card p-6 rounded-xl border border-border shadow-sm hover:shadow-md transition-all duration-300 group">
+        <div className="bg-card p-4 md:p-6 rounded-xl border border-border shadow-sm hover:shadow-md transition-all duration-300 group">
           <div className="flex justify-between items-start">
             <div>
               <p className="text-muted-foreground text-xs font-semibold uppercase tracking-wider">Total Users</p>
@@ -52,31 +52,31 @@ export default function Dashboard() {
           </div>
         </div>
 
-        <div className="bg-card p-6 rounded-xl border border-border shadow-sm hover:shadow-md transition-all duration-300 group">
+        <div className="bg-card p-4 md:p-6 rounded-xl border border-border shadow-sm hover:shadow-md transition-all duration-300 group">
           <div className="flex justify-between items-start">
             <div>
               <p className="text-muted-foreground text-xs font-semibold uppercase tracking-wider">Babies Profiles</p>
               <h3 className="text-3xl font-bold text-foreground mt-2 group-hover:text-primary transition-colors">{stats?.babies ?? "-"}</h3>
             </div>
-            <div className="p-3 bg-accent/15 text-accent rounded-lg group-hover:bg-accent group-hover:text-accent-foreground transition-all duration-300">
+            <div className="p-3 bg-primary/15 text-primary rounded-lg group-hover:bg-primary group-hover:text-primary-foreground transition-all duration-300">
               <Baby className="h-6 w-6" />
             </div>
           </div>
         </div>
 
-        <div className="bg-card p-6 rounded-xl border border-border shadow-sm hover:shadow-md transition-all duration-300 group">
+        <div className="bg-card p-4 md:p-6 rounded-xl border border-border shadow-sm hover:shadow-md transition-all duration-300 group">
           <div className="flex justify-between items-start">
             <div>
               <p className="text-muted-foreground text-xs font-semibold uppercase tracking-wider">Memories Shared</p>
               <h3 className="text-3xl font-bold text-foreground mt-2 group-hover:text-primary transition-colors">{stats?.memories ?? "-"}</h3>
             </div>
-            <div className="p-3 bg-accent/15 text-accent rounded-lg group-hover:bg-accent group-hover:text-accent-foreground transition-all duration-300">
+            <div className="p-3 bg-primary/15 text-primary rounded-lg group-hover:bg-primary group-hover:text-primary-foreground transition-all duration-300">
               <Heart className="h-6 w-6" />
             </div>
           </div>
         </div>
 
-        <div className="bg-card p-6 rounded-xl border border-border shadow-sm hover:shadow-md transition-all duration-300 group">
+        <div className="bg-card p-4 md:p-6 rounded-xl border border-border shadow-sm hover:shadow-md transition-all duration-300 group">
           <div className="flex justify-between items-start">
             <div>
               <p className="text-muted-foreground text-xs font-semibold uppercase tracking-wider">Dream Tales</p>
@@ -91,7 +91,7 @@ export default function Dashboard() {
 
       {/* Chart Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <div className="bg-card p-6 rounded-xl border border-border shadow-sm">
+        <div className="bg-card p-4 md:p-6 rounded-xl border border-border shadow-sm">
           <h4 className="font-semibold text-foreground mb-4 flex items-center gap-2">
             <span className="h-2.5 w-2.5 bg-primary rounded-full" />
             User Signups (Last 30 Days)
@@ -140,7 +140,7 @@ export default function Dashboard() {
           </div>
         </div>
 
-        <div className="bg-card p-6 rounded-xl border border-border shadow-sm">
+        <div className="bg-card p-4 md:p-6 rounded-xl border border-border shadow-sm">
           <h4 className="font-semibold text-foreground mb-4 flex items-center gap-2">
             <span className="h-2.5 w-2.5 bg-accent rounded-full" />
             Memories Shared (Last 30 Days)

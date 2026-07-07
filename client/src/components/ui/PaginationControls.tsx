@@ -11,7 +11,7 @@ export function PaginationControls({ currentPage, totalPages, onPageChange }: Pa
   if (totalPages <= 1) return null;
 
   return (
-    <div className="flex items-center justify-between px-6 py-4 border-t border-border bg-card">
+    <div className="flex flex-wrap items-center justify-between gap-4 px-4 md:px-6 py-4 border-t border-border bg-card">
       <div className="text-sm text-muted-foreground">
         Page <span className="font-semibold text-foreground">{currentPage}</span> of{" "}
         <span className="font-semibold text-foreground">{totalPages}</span>

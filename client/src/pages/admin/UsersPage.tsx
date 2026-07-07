@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Trash2, X } from "lucide-react";
 import { PaginationControls } from "../../components/ui/PaginationControls";
 import { ConfirmDialog } from "../../components/ConfirmDialog";
+import { Skeleton } from "../../components/ui/skeleton";
 import { apiFetch } from "../../lib/api";
 import avtar from "../../public/default.jpg";
 export default function UsersPage() {
@@ -71,7 +72,7 @@ export default function UsersPage() {
   return (
     <div className="bg-card rounded-xl border border-border shadow-sm overflow-hidden animate-fadeIn">
       {/* Table search & filter header */}
-      <div className="p-6 border-b border-border flex flex-col md:flex-row md:items-center justify-between gap-4 bg-muted/50">
+      <div className="p-4 md:p-6 border-b border-border flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="relative flex-1 max-w-md">
           <input
             type="text"
@@ -89,32 +90,33 @@ export default function UsersPage() {
             </button>
           )}
         </div>
-        <div className="text-xs text-white/70 font-medium">
-          {loading ? "" : `Total ${totalRecords} entries in database`}
+        <div className="text-xs text-white font-medium">
+          {loading ? "" : `Total ${totalRecords} Records.`}
         </div>
       </div>
 
       {error && (
-        <div className="p-6 text-rose-600 bg-rose-50 border-b border-rose-100 text-sm">
+        <div className="p-4 md:p-6 text-rose-600 bg-rose-50 border-b border-rose-100 text-sm">
           {error}
         </div>
       )}
 
       {/* Table Area */}
       {loading ? (
-        <div className="py-20 flex flex-col items-center justify-center gap-3 text-white/70">
-          <div className="animate-spin rounded-full h-8 w-8 border-2 border-t-transparent border-[#5F7A68]"></div>
-          <span className="text-sm font-medium">Loading users...</span>
+        <div className="p-4 md:p-6 space-y-4 w-full">
+          {[1, 2, 3, 4, 5, 6].map((i) => (
+            <Skeleton key={i} className="h-14 w-full rounded-md" />
+          ))}
         </div>
       ) : (
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse text-sm">
+        <div className="overflow-x-auto w-full">
+          <table className="w-full min-w-[800px] text-left text-sm whitespace-nowrap">
             <thead>
-              <tr className="bg-muted/30 border-b border-border text-xs font-semibold uppercase tracking-wider">
+              <tr className="border-b border-border text-xs font-semibold uppercase tracking-wider">
                 <th className="px-6 py-4">User Details</th>
                 <th className="px-6 py-4">Status & Provider</th>
                 <th className="px-6 py-4">Preferences</th>
-                <th className="px-6 py-4">Stats</th>
+                <th className="px-6 py-4">Baby Owned</th>
                 <th className="px-6 py-4">Registered At</th>
                 <th className="px-6 py-4 text-right">Actions</th>
               </tr>
@@ -150,23 +152,23 @@ export default function UsersPage() {
                       <div className="flex items-center gap-1.5">
                         <span className={`h-2 w-2 rounded-full ${u.emailVerified ? "bg-emerald-500" : "bg-amber-400"}`} />
                         <span className="text-xs font-medium text-white/70">
-                          {u.emailVerified ? "Verified" : "Pending Verification"}
+                          {u.emailVerified ? "Verified" : "Pending "}
                         </span>
                       </div>
-                      <span className="inline-block px-2 py-0.5 rounded text-[10px] font-semibold bg-[#E1A53D]/20 text-black uppercase">
+                      <span className="inline-block px-2 py-0.5 rounded text-[12px] font-bold  text-white">
                         {u.authProvider}
                       </span>
                     </div>
                   </td>
-                  <td className="px-6 py-4 text-xs font-medium text-white/70">
+                  <td className="px-6 py-4 text-xs font-medium text-white">
                     <div className="flex items-center gap-3">
-                      <span>Status: <span className="inline-block px-1.5 py-0.5 rounded text-[10px] font-bold bg-[#C9AE7B]/20 text-[#5F7A68]">{u.subscriptionStatus || "free"}</span></span>
+                      <span><span className="inline-block px-1.5 py-0.5 rounded text-[12px] font-bold  text-white">{u.subscriptionStatus || "free"}</span></span>
                     </div>
                   </td>
-                  <td className="px-6 py-4 text-xs text-white/70">
-                    <div>Babies Owned: <span className="font-semibold text-white">{u.babyCount}</span></div>
+                  <td className="px-6 py-4 text-xs text-white">
+                    <div> <span className="font-semibold text-white">{u.babyCount}</span></div>
                   </td>
-                  <td className="px-6 py-4 text-xs text-white/70">{formatDate(u.createdAt)}</td>
+                  <td className="px-6 py-4 text-xs text-white">{formatDate(u.createdAt)}</td>
                   <td className="px-6 py-4 text-right space-x-2">
                     <button
                       onClick={() => deleteUser(u.id)}
