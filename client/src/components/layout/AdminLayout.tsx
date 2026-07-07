@@ -64,12 +64,12 @@ export default function AdminLayout({ onLogout }: AdminLayoutProps) {
         ${isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"}
         md:relative md:translate-x-0
         ${isCollapsed ? 'md:w-20 w-64' : 'w-64'} 
-        bg-sidebar text-sidebar-foreground flex flex-col shadow-2xl border-r border-sidebar-border 
+        bg-sidebar text-sidebar-foreground flex flex-col shadow-2xl border-r border-white/20 
       `}>
         <div className="flex-1 flex flex-col justify-between"> {/* Changed to justify-between to place logout button at the absolute bottom */}
           <div>
             {/* Brand Header */}
-            <div className={`h-20 flex items-center border-b border-border transition-all duration-300 ${isCollapsed ? 'justify-center px-0' : 'px-4'}`}>
+            <div className={`h-20 flex items-center border-b border-white/20 transition-all duration-300 ${isCollapsed ? 'justify-center px-0' : 'px-4'}`}>
               <div className={`flex items-center transition-all duration-300 ${isCollapsed ? '' : 'gap-3'}`}>
                 <div className="h-10 w-10 rounded-xl overflow-hidden bg-[#EBA545] shadow-md flex-shrink-0">
                   <img src={TinyLogo} alt="Tiny Love logo" className="h-full w-full object-cover" />
@@ -106,8 +106,8 @@ export default function AdminLayout({ onLogout }: AdminLayoutProps) {
             </nav>
           </div>
 
-          {/* 3. New Bottom Sign Out Button Container */}
-          <div className="p-3 border-t border-sidebar-border">
+          {/* User / Sign Out Footer */}
+          <div className="p-3 border-t border-white/20">
             <button
               onClick={onLogout}
               title={isCollapsed ? "Sign Out" : undefined}
@@ -126,9 +126,9 @@ export default function AdminLayout({ onLogout }: AdminLayoutProps) {
       </aside>
 
       {/* Main Content Area */}
-      <main className="flex-1 flex flex-col overflow-hidden">
+      <main className="flex-1 overflow-y-auto relative bg-background">
         {/* Top Header */}
-        <header className="shrink-0 h-20 bg-transparent border-b border-border px-4 md:px-8 flex items-center justify-between sticky top-0 z-30">
+        <header className="shrink-0 h-20 bg-background/70 backdrop-blur-md border-b border-white/20 px-4 md:px-8 flex items-center justify-between sticky top-0 z-30">
           <div className="flex items-center gap-4">
             
             {/* Mobile Menu Toggle */}
@@ -151,17 +151,15 @@ export default function AdminLayout({ onLogout }: AdminLayoutProps) {
                 <ChevronLeft className="h-7 w-7" />
               )}            
             </button>
-            <h2 className="text-xl font-semibold capitalize text-foreground border-l border-border pl-4">
+            <h2 className="text-xl font-semibold capitalize text-foreground">
               {getPageTitle()}
             </h2>
           </div>
         </header>
 
         {/* Page Content Outlet */}
-        <div className="flex-1 overflow-y-auto">
-          <div className="p-4 md:p-8 max-w-7xl w-full mx-auto space-y-6 md:space-y-8">
-            <Outlet />
-          </div>
+        <div className="p-4 md:p-8 max-w-7xl w-full mx-auto space-y-6 md:space-y-8 min-h-[calc(100vh-5rem)]">
+          <Outlet />
         </div>
       </main>
     </div>
