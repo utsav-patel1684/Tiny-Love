@@ -90,7 +90,7 @@ export default function AdminLayout({ onLogout }: AdminLayoutProps) {
                     to={item.path}
                     title={isCollapsed ? item.label : undefined}
                     className={`w-full flex items-center h-12 ${isCollapsed ? 'justify-center px-0' : 'px-4'} rounded-lg text-base font-medium transition-all duration-200 group cursor-pointer ${isActive
-                      ? "bg-[#EBA545] text-black shadow-md"
+                      ? "bg-[#EBA545] text-white shadow-md"
                       : "text-white hover:bg-accent hover:text-white"
                       }`}
                   >

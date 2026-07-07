@@ -109,7 +109,7 @@ export default function UsersPage() {
           ))}
         </div>
       ) : (
-        <div className="overflow-x-auto w-full">
+        <div className="overflow-x-auto overflow-y-hidden w-full">
           <table className="w-full min-w-[800px] text-left text-sm whitespace-nowrap">
             <thead>
               <tr className="border-b border-border text-xs font-semibold uppercase tracking-wider">

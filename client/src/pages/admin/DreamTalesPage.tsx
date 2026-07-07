@@ -109,7 +109,7 @@ export default function DreamTalesPage() {
           ))}
         </div>
       ) : (
-        <div className="overflow-x-auto w-full">
+        <div className="overflow-x-auto overflow-y-hidden w-full">
           <table className="w-full min-w-[800px] text-left border-collapse text-sm">
             <thead>
               <tr className="border-b border-border text-xs font-semibold uppercase tracking-wider">
