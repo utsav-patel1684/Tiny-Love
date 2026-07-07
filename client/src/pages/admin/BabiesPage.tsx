@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { Trash2, X } from "lucide-react";
+import { Trash2, X, Eye, Pencil } from "lucide-react";
+import { Link } from "react-router-dom";
 import { PaginationControls } from "../../components/ui/PaginationControls";
 import { ConfirmDialog } from "../../components/ConfirmDialog";
 import { Skeleton } from "../../components/ui/skeleton";
@@ -155,14 +156,30 @@ export default function BabiesPage() {
                     </div>
                   </td>
                   <td className=" py-4 font-semibold text-white/80 px-8">{b.memoryCount}</td>
-                  <td className="px-6 py-4 text-right">
-                    <button
-                      onClick={() => deleteBaby(b.id)}
-                      className="text-red-400 hover:text-red-600 hover:bg-red-50 p-2 rounded-lg transition-colors cursor-pointer"
-                      title="Delete Profile"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
+                  <td className="px-6 py-4">
+                    <div className="flex items-center justify-end gap-2">
+                      <Link
+                        to={`/babies/${b.id}`}
+                        className="inline-flex items-center justify-center text-blue-400 hover:text-blue-600 hover:bg-blue-50 p-2 rounded-lg transition-colors cursor-pointer"
+                        title="View Baby"
+                      >
+                        <Eye className="h-4 w-4" />
+                      </Link>
+                      <Link
+                        to={`/babies/${b.id}`}
+                        className="inline-flex items-center justify-center text-amber-500 hover:text-amber-700 hover:bg-amber-50 p-2 rounded-lg transition-colors cursor-pointer"
+                        title="Edit Baby"
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </Link>
+                      <button
+                        onClick={() => deleteBaby(b.id)}
+                        className="inline-flex items-center justify-center text-red-400 hover:text-red-600 hover:bg-red-50 p-2 rounded-lg transition-colors cursor-pointer"
+                        title="Delete Baby"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}

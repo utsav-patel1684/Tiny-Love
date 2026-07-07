@@ -1,64 +1,55 @@
 import React, { useState, useEffect } from "react";
-import { Trash2, X, Eye } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Trash2, X, ExternalLink } from "lucide-react";
 import { PaginationControls } from "../../components/ui/PaginationControls";
 import { ConfirmDialog } from "../../components/ConfirmDialog";
 import { Skeleton } from "../../components/ui/skeleton";
 import { apiFetch } from "../../lib/api";
 
-export default function InvitesPage() {
-
-  const [invites, setInvites] = useState<any[]>([]);
+export default function HighlightsPage() {
+  const [highlights, setHighlights] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [error, setError] = useState<string | null>(null);
 
-  // Pagination state
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalRecords, setTotalRecords] = useState(0);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [confirmingId, setConfirmingId] = useState<string | null>(null);
 
-  const fetchInvites = async () => {
+  const fetchHighlights = async () => {
     setLoading(true);
-
     try {
-      const data = await apiFetch<any>(
-        `/admin/invites?page=${page}&limit=10`
-      );
-
-      setInvites(data.data ?? []);
+      const data = await apiFetch<any>(`/admin/highlights?page=${page}&limit=10`);
+      setHighlights(data.data ?? []);
       setTotalPages(data.totalPages ?? 1);
       setTotalRecords(data.total ?? 0);
       setError(null);
     } catch (err) {
       console.error(err);
-      setError("Failed to load invites data.");
+      setError("Failed to load highlights data.");
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchInvites();
+    fetchHighlights();
   }, [page]);
 
-  const revokeInvite = (inviteId: string) => {
-    setConfirmingId(inviteId);
+  const deleteHighlight = (id: string) => {
+    setConfirmingId(id);
     setConfirmOpen(true);
   };
 
   const handleConfirmDelete = async () => {
     if (!confirmingId) return;
     try {
-      await apiFetch(`/admin/invites/${confirmingId}`, {
-        method: "DELETE",
-      });
-      alert("Invite revoked successfully.");
-      fetchInvites();
+      await apiFetch(`/admin/highlights/${confirmingId}`, { method: "DELETE" });
+      alert("Highlight deleted successfully.");
+      fetchHighlights();
     } catch {
-      alert("Failed to revoke invite.");
+      alert("Failed to delete highlight.");
     } finally {
       setConfirmOpen(false);
       setConfirmingId(null);
@@ -78,7 +69,7 @@ export default function InvitesPage() {
         <div className="relative flex-1 max-w-md">
           <input
             type="text"
-            placeholder="Search invites..."
+            placeholder="Search by Name..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full pl-4 pr-10 py-2 rounded-lg border border-border focus:outline-none focus:ring-2 focus:ring-primary text-sm bg-background text-foreground"
@@ -96,7 +87,6 @@ export default function InvitesPage() {
           {loading ? "" : `Total ${totalRecords} Records.`}
         </div>
       </div>
-
       {error && (
         <div className="p-4 md:p-6 text-rose-600 bg-rose-50 border-b border-rose-100 text-sm">
           {error}
@@ -114,73 +104,55 @@ export default function InvitesPage() {
           <table className="w-full min-w-[800px] text-left border-collapse text-sm">
             <thead>
               <tr className="border-b border-border text-xs font-semibold uppercase tracking-wider">
-                <th className="px-6 py-4">Token</th>
-                <th className="px-6 py-4">Invited Family Role</th>
-                <th className="px-6 py-4">Assigned Baby</th>
-                <th className="px-6 py-4">Details</th>
-
+                <th className="px-6 py-4">ID</th>
+                <th className="px-6 py-4">Baby ID</th>
+                <th className="px-6 py-4">Name</th>
+                <th className="px-6 py-4">Cover</th>
+                <th className="px-6 py-4">Created At</th>
                 <th className="px-6 py-4 text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
-              {invites.filter(i =>
-                i.invitedEmail?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                i.role?.toLowerCase().includes(searchQuery.toLowerCase())
-              ).map((i) => (
-                <tr key={i.id} className="hover:bg-muted/70 transition-colors">
+              {highlights.filter(h =>
+                h.name?.toLowerCase().includes(searchQuery.toLowerCase())
+              ).map((h) => (
+                <tr key={h.id} className="hover:bg-muted/70 transition-colors">
                   <td className="px-6 py-4">
-                    <div className="font-mono text-xs text-white/70">{i.token}</div>
+                    <span className="font-mono text-xs text-white/70">{h.id?.slice(0,8)}...</span>
                   </td>
                   <td className="px-6 py-4">
-                    <div className="flex items-center gap-2">
-                      <span className="font-semibold text-white">{i.role}</span>
-                      <span className="inline-block px-1.5 py-0.5 rounded text-[10px] font-bold bg-white/10 text-white">
-                        {i.canManageContent ? "Can Upload / Edit" : "Viewer Only"}
-                      </span>
-                    </div>
+                    <span className="font-mono text-xs text-white/70">{h.baby_id?.slice(0,8)}...</span>
+                  </td>
+                  <td className="px-6 py-4 font-semibold text-white">
+                    {h.name}
                   </td>
                   <td className="px-6 py-4">
-                    <div className="flex items-center gap-2">
-                      <span className="font-medium text-white">{i.babyName}</span>
-                      <span className="text-xs text-white/70">| Parent: {i.parentName}</span>
-                    </div>
+                    {h.cover_url ? (
+                      <a href={h.cover_url} target="_blank" rel="noreferrer" className="text-white/70 hover:text-white flex items-center gap-1 text-xs">
+                        View <ExternalLink className="h-3 w-3" />
+                      </a>
+                    ) : (
+                      <span className="text-white/50 text-xs">No Cover</span>
+                    )}
                   </td>
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-3">
-                      {i.invitedEmail && <span className="text-xs font-mono text-white/70">Email: {i.invitedEmail}</span>}
-                      <div className="flex items-center gap-1.5">
-                        <span className={`h-2 w-2 rounded-full ${i.usedAt ? "bg-emerald-500" : "bg-amber-400"}`} />
-                        <span className="text-xs font-semibold text-white/70">
-                          {i.usedAt ? `Joined ${new Date(i.usedAt).toLocaleDateString()}` : "Pending"}
-                        </span>
-                      </div>
-                    </div>
+                  <td className="px-6 py-4 text-xs text-white/70">
+                    {formatDate(h.created_at)}
                   </td>
-
-                  <td className="px-6 py-4">
-                    <div className="flex items-center justify-end gap-2">
-                      <Link
-                        to={`/invites/${i.id}`}
-                        className="inline-flex items-center justify-center text-blue-400 hover:text-blue-600 hover:bg-blue-50 p-2 rounded-lg transition-colors cursor-pointer"
-                        title="View Invite"
-                      >
-                        <Eye className="h-4 w-4" />
-                      </Link>
-                      <button
-                        onClick={() => revokeInvite(i.id)}
-                        className="inline-flex items-center justify-center text-red-400 hover:text-red-600 hover:bg-red-50 p-2 rounded-lg transition-colors cursor-pointer"
-                        title="Revoke Invite"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </button>
-                    </div>
+                  <td className="px-6 py-4 text-right">
+                    <button
+                      onClick={() => deleteHighlight(h.id)}
+                      className="text-red-400 hover:text-red-600 hover:bg-red-50 p-2 rounded-lg transition-colors cursor-pointer"
+                      title="Delete Highlight"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
                   </td>
                 </tr>
               ))}
-              {invites.length === 0 && (
+              {highlights.length === 0 && (
                 <tr>
                   <td colSpan={6} className="px-6 py-8 text-center text-white/70">
-                    No invites found.
+                    No highlights found.
                   </td>
                 </tr>
               )}
@@ -197,9 +169,9 @@ export default function InvitesPage() {
 
       <ConfirmDialog
         open={confirmOpen}
-        title="Revoke Invite"
-        description="Are you sure you want to revoke this invite?"
-        confirmText="Revoke"
+        title="Delete Highlight"
+        description="Are you sure you want to delete this highlight?"
+        confirmText="Delete"
         cancelText="Cancel"
         isDestructive={true}
         onConfirm={handleConfirmDelete}

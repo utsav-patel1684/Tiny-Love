@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { Trash2, ExternalLink, X } from "lucide-react";
+import { Trash2, ExternalLink, X, Eye, Pencil } from "lucide-react";
+import { Link } from "react-router-dom";
 import { PaginationControls } from "../../components/ui/PaginationControls";
 import { ConfirmDialog } from "../../components/ConfirmDialog";
 import { Skeleton } from "../../components/ui/skeleton";
@@ -162,14 +163,30 @@ export default function MemoriesPage() {
                     </div>
                   </td>
                   {/* <td className="px-6 py-4 text-xs text-white/70">{formatDate(m.createdAt)}</td> */}
-                  <td className="px-6 py-4 text-right">
-                    <button
-                      onClick={() => deleteMemory(m.id)}
-                      className="text-red-400 hover:text-red-600 hover:bg-red-50 p-2 rounded-lg transition-colors cursor-pointer"
-                      title="Delete Memory"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
+                  <td className="px-6 py-4">
+                    <div className="flex items-center justify-end gap-2">
+                      <Link
+                        to={`/memories/${m.id}`}
+                        className="inline-flex items-center justify-center text-blue-400 hover:text-blue-600 hover:bg-blue-50 p-2 rounded-lg transition-colors cursor-pointer"
+                        title="View Memory"
+                      >
+                        <Eye className="h-4 w-4" />
+                      </Link>
+                      <Link
+                        to={`/memories/${m.id}`}
+                        className="inline-flex items-center justify-center text-amber-500 hover:text-amber-700 hover:bg-amber-50 p-2 rounded-lg transition-colors cursor-pointer"
+                        title="Edit Memory"
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </Link>
+                      <button
+                        onClick={() => deleteMemory(m.id)}
+                        className="inline-flex items-center justify-center text-red-400 hover:text-red-600 hover:bg-red-50 p-2 rounded-lg transition-colors cursor-pointer"
+                        title="Delete Memory"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}

@@ -17,7 +17,9 @@ import {
   ChevronRight,
   Menu,
   X,
-  Loader2
+  Loader2,
+  Smile,
+  Star
 } from "lucide-react";
 
 // 2. Define the TypeScript props interface to receive onLogout from App.tsx
@@ -38,6 +40,8 @@ export default function AdminLayout({ onLogout }: AdminLayoutProps) {
     if (currentPath.includes("memories")) return "Memories";
     if (currentPath.includes("invites")) return "Invites";
     if (currentPath.includes("dream-tales")) return "AI Dream Tales";
+    if (currentPath.includes("reactions")) return "Reactions";
+    if (currentPath.includes("highlights")) return "Highlights";
     return "Dashboard";
   };
 
@@ -55,6 +59,8 @@ export default function AdminLayout({ onLogout }: AdminLayoutProps) {
     { path: "/memories", label: "Memories", icon: Heart },
     { path: "/invites", label: "Invites", icon: Mail },
     { path: "/dream-tales", label: "Dream Tales", icon: BookOpen },
+    { path: "/reactions", label: "Reactions", icon: Smile },
+    { path: "/highlights", label: "Highlights", icon: Star },
   ];
 
   return (

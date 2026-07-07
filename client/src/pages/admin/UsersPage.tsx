@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { Trash2, X } from "lucide-react";
+import { Trash2, X, Eye, Pencil } from "lucide-react";
+import { Link } from "react-router-dom";
 import { PaginationControls } from "../../components/ui/PaginationControls";
 import { ConfirmDialog } from "../../components/ConfirmDialog";
 import { Skeleton } from "../../components/ui/skeleton";
@@ -169,14 +170,30 @@ export default function UsersPage() {
                     <div> <span className="font-semibold text-white">{u.babyCount}</span></div>
                   </td>
                   <td className="px-6 py-4 text-xs text-white">{formatDate(u.createdAt)}</td>
-                  <td className="px-6 py-4 text-right space-x-2">
-                    <button
-                      onClick={() => deleteUser(u.id)}
-                      className="text-red-400 hover:text-red-600 hover:bg-red-50 p-2 rounded-lg transition-colors cursor-pointer"
-                      title="Delete User"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
+                  <td className="px-6 py-4">
+                    <div className="flex items-center justify-end gap-2">
+                      <Link
+                        to={`/users/${u.id}`}
+                        className="inline-flex items-center justify-center text-blue-400 hover:text-blue-600 hover:bg-blue-50 p-2 rounded-lg transition-colors cursor-pointer"
+                        title="View User"
+                      >
+                        <Eye className="h-4 w-4" />
+                      </Link>
+                      <Link
+                        to={`/users/${u.id}`}
+                        className="inline-flex items-center justify-center text-amber-500 hover:text-amber-700 hover:bg-amber-50 p-2 rounded-lg transition-colors cursor-pointer"
+                        title="Edit User"
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </Link>
+                      <button
+                        onClick={() => deleteUser(u.id)}
+                        className="inline-flex items-center justify-center text-red-400 hover:text-red-600 hover:bg-red-50 p-2 rounded-lg transition-colors cursor-pointer"
+                        title="Delete User"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}

@@ -3,10 +3,17 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import AdminLayout from "./components/layout/AdminLayout";
 import Dashboard from "./pages/admin/Dashboard";
 import UsersPage from "./pages/admin/UsersPage";
+import UserDetailPage from "./pages/admin/UserDetailPage";
 import BabiesPage from "./pages/admin/BabiesPage";
+import BabyDetailPage from "./pages/admin/BabyDetailPage";
 import MemoriesPage from "./pages/admin/MemoriesPage";
+import MemoryDetailPage from "./pages/admin/MemoryDetailPage";
 import InvitesPage from "./pages/admin/InvitesPage";
+import InviteDetailPage from "./pages/admin/InviteDetailPage";
 import DreamTalesPage from "./pages/admin/DreamTalesPage";
+import DreamTaleDetailPage from "./pages/admin/DreamTaleDetailPage";
+import ReactionsPage from "./pages/admin/ReactionsPage";
+import HighlightsPage from "./pages/admin/HighlightsPage";
 // 1. Import your brand new Login page here (adjust path if needed)
 import { Login } from "./pages/admin/Login";
 
@@ -51,10 +58,17 @@ function App() {
         >
           <Route index element={<Dashboard />} />
           <Route path="users" element={<UsersPage />} />
+          <Route path="users/:id" element={<UserDetailPage />} />
           <Route path="babies" element={<BabiesPage />} />
+          <Route path="babies/:id" element={<BabyDetailPage />} />
           <Route path="memories" element={<MemoriesPage />} />
+          <Route path="memories/:id" element={<MemoryDetailPage />} />
           <Route path="invites" element={<InvitesPage />} />
+          <Route path="invites/:id" element={<InviteDetailPage />} />
           <Route path="dream-tales" element={<DreamTalesPage />} />
+          <Route path="dream-tales/:id" element={<DreamTaleDetailPage />} />
+          <Route path="reactions" element={<ReactionsPage />} />
+          <Route path="highlights" element={<HighlightsPage />} />
         </Route>
 
         {/* Fallback Catch-All Route */}
