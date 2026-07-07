@@ -121,13 +121,21 @@ app.get('/api/babies', async (req, res) => {
       createdAt: schema.babiesTable.createdAt,
       parentName: schema.usersTable.name,
       parentEmail: schema.usersTable.email,
+      profilePhoto: schema.babiesTable.profilePhoto,
       memoryCount: sql<number>`COUNT(DISTINCT ${schema.memoriesTable.id})`
     })
       .from(schema.babiesTable)
       .leftJoin(schema.usersTable, eq(schema.usersTable.id, schema.babiesTable.parentId))
       .leftJoin(schema.memoriesTable, eq(schema.memoriesTable.babyId, schema.babiesTable.id))
-      .groupBy(schema.babiesTable.id, schema.usersTable.name, schema.usersTable.email)
-      .orderBy(desc(schema.babiesTable.createdAt))
+      .groupBy(
+        schema.babiesTable.id,
+        schema.babiesTable.name,
+        schema.babiesTable.parentId,
+        schema.babiesTable.createdAt,
+        schema.babiesTable.profilePhoto,
+        schema.usersTable.name,
+        schema.usersTable.email
+      ).orderBy(desc(schema.babiesTable.createdAt))
       .limit(limit)
       .offset(offset);
 

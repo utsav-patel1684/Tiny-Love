@@ -10,6 +10,7 @@
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
+    "dotenv": "^17.4.2",
     "react-router-dom": "^7.18.1"
   },
   "devDependencies": {

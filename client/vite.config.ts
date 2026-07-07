@@ -2,12 +2,13 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 import path from "path";
+import dotenv from "dotenv"
+dotenv.config()
 
-
-const rawPort = process.env.PORT || "3000";
+const rawPort = 8080;
 const port = Number(rawPort);
 
-const basePath = process.env.BASE_PATH || "/";
+const basePath = "/";
 
 export default defineConfig({
   base: basePath,
@@ -17,9 +18,7 @@ export default defineConfig({
 
     ...(process.env.NODE_ENV !== "production" &&
       process.env.REPL_ID !== undefined
-      ? [
-
-      ]
+      ? []
       : []),
   ],
   resolve: {
