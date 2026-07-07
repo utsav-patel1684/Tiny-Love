@@ -16,7 +16,8 @@ import {
   ChevronLeft,
   ChevronRight,
   Menu,
-  X
+  X,
+  Loader2
 } from "lucide-react";
 
 // 2. Define the TypeScript props interface to receive onLogout from App.tsx
@@ -27,6 +28,7 @@ interface AdminLayoutProps {
 export default function AdminLayout({ onLogout }: AdminLayoutProps) {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
   const location = useLocation();
   const currentPath = location.pathname;
 
@@ -37,6 +39,13 @@ export default function AdminLayout({ onLogout }: AdminLayoutProps) {
     if (currentPath.includes("invites")) return "Invites";
     if (currentPath.includes("dream-tales")) return "AI Dream Tales";
     return "Dashboard";
+  };
+
+  const handleLogoutClick = () => {
+    setIsLoggingOut(true);
+    setTimeout(() => {
+      onLogout();
+    }, 800);
   };
 
   const navItems = [
@@ -109,15 +118,20 @@ export default function AdminLayout({ onLogout }: AdminLayoutProps) {
           {/* User / Sign Out Footer */}
           <div className="p-3 border-t border-white/20">
             <button
-              onClick={onLogout}
+              onClick={handleLogoutClick}
+              disabled={isLoggingOut}
               title={isCollapsed ? "Sign Out" : undefined}
-              className={`w-full flex items-center h-12 ${isCollapsed ? 'justify-center px-0' : 'px-4'} text-white/75 text-base font-medium rounded-lg hover:bg-accent hover:text-white`}
+              className={`w-full flex items-center h-12 ${isCollapsed ? 'justify-center px-0' : 'px-4'} text-white/75 text-base font-medium rounded-lg hover:bg-accent hover:text-white ${isLoggingOut ? 'opacity-50 cursor-not-allowed' : ''}`}
             >
               <div className={`flex items-center justify-center transition-all duration-200 ${isCollapsed ? 'w-full' : 'w-5'}`}>
-                <LogOut className="h-5 w-5 flex-shrink-0 group-hover:scale-110 transition-transform" />
+                {isLoggingOut ? (
+                  <Loader2 className="h-5 w-5 flex-shrink-0 animate-spin" />
+                ) : (
+                  <LogOut className="h-5 w-5 flex-shrink-0 group-hover:scale-110 transition-transform" />
+                )}
               </div>
               <span className={`whitespace-nowrap transition-all duration-200 ${isCollapsed ? 'opacity-0 w-0 ml-0 overflow-hidden' : 'opacity-100 w-auto ml-4'}`}>
-                Sign Out
+                {isLoggingOut ? 'Signing out...' : 'Sign Out'}
               </span>
             </button>
           </div>

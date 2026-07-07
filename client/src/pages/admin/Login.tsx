@@ -47,23 +47,22 @@ export function Login({ onLoginSuccess }: LoginProps) {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-zinc-950 px-4">
-            <div className="w-full max-w-md bg-zinc-900 border border-zinc-800 rounded-xl p-8 shadow-2xl">
+        <div className="min-h-screen flex items-center justify-center bg-background px-4">
+            <div className="w-full max-w-md bg-card border border-border rounded-xl p-8 shadow-2xl">
                 <div className="flex flex-col items-center mb-8">
-
-                    <h2 className="text-2xl font-bold text-zinc-100">Tiny Love Admin</h2>
-                    <p className="text-sm text-zinc-400 mt-1">Sign in to access control panel</p>
+                    <h2 className="text-2xl font-bold text-white">Tiny Love Admin</h2>
+                    <p className="text-sm text-white/70 mt-1">Sign in to access control panel</p>
                 </div>
 
                 {error && (
-                    <div className="mb-6 p-3.5 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-400 text-sm font-medium">
+                    <div className="mb-6 p-3.5 rounded-lg bg-destructive/20 border border-destructive/50 text-white text-sm font-medium">
                         {error}
                     </div>
                 )}
 
                 <form onSubmit={handleSubmit} className="space-y-5">
                     <div>
-                        <label className="block text-xs font-semibold text-zinc-400 tracking-wider uppercase mb-2">
+                        <label className="block text-xs font-semibold text-white/70 tracking-wider uppercase mb-2">
                             Email Address
                         </label>
                         <input
@@ -71,13 +70,13 @@ export function Login({ onLoginSuccess }: LoginProps) {
                             required
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
-                            className="w-full px-4 py-2.5 bg-zinc-950 border border-zinc-800 rounded-lg text-zinc-200 focus:outline-none focus:border-amber-500 transition-colors"
+                            className="w-full px-4 py-2.5 bg-background border border-border rounded-lg text-white focus:outline-none focus:border-[#EBA545] transition-colors"
                             placeholder="admin@example.com"
                         />
                     </div>
 
                     <div>
-                        <label className="block text-xs font-semibold text-zinc-400 tracking-wider uppercase mb-2">
+                        <label className="block text-xs font-semibold text-white/70 tracking-wider uppercase mb-2">
                             Password
                         </label>
                         <input
@@ -85,7 +84,7 @@ export function Login({ onLoginSuccess }: LoginProps) {
                             required
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
-                            className="w-full px-4 py-2.5 bg-zinc-950 border border-zinc-800 rounded-lg text-zinc-200 focus:outline-none focus:border-amber-500 transition-colors"
+                            className="w-full px-4 py-2.5 bg-background border border-border rounded-lg text-white focus:outline-none focus:border-[#EBA545] transition-colors"
                             placeholder="••••••••"
                         />
                     </div>
@@ -93,7 +92,7 @@ export function Login({ onLoginSuccess }: LoginProps) {
                     <button
                         type="submit"
                         disabled={loading}
-                        className="w-full py-3 mt-2 bg-amber-500 hover:bg-amber-600 disabled:bg-amber-500/50 text-zinc-950 font-semibold rounded-lg transition-colors focus:outline-none"
+                        className="w-full py-3 mt-2 bg-[#EBA545] hover:opacity-90 disabled:opacity-50 text-white font-semibold rounded-lg transition-all focus:outline-none shadow-md"
                     >
                         {loading ? 'Authenticating...' : 'Sign In'}
                     </button>
