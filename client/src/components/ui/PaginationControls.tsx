@@ -29,11 +29,14 @@ export function PaginationControls({ currentPage, totalPages, onPageChange }: Pa
         <div className="flex items-center gap-1">
           {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
             // Logic to show pages around current page
-            let pageNum = i + 1;
-            if (totalPages > 5 && currentPage > 3) {
-              pageNum = currentPage - 2 + i;
-              if (pageNum > totalPages) pageNum = totalPages - 4 + i;
+            let startPage = 1;
+            if (totalPages > 5) {
+              startPage = Math.max(1, currentPage - 2);
+              if (startPage + 4 > totalPages) {
+                startPage = totalPages - 4;
+              }
             }
+            const pageNum = startPage + i;
 
             return (
               <button
