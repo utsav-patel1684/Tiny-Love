@@ -1,21 +1,21 @@
 import React, { useState } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import AdminLayout from "./components/layout/AdminLayout";
-import Dashboard from "./pages/admin/Dashboard";
-import UsersPage from "./pages/admin/UsersPage";
-import UserDetailPage from "./pages/admin/UserDetailPage";
-import BabiesPage from "./pages/admin/BabiesPage";
-import BabyDetailPage from "./pages/admin/BabyDetailPage";
-import MemoriesPage from "./pages/admin/MemoriesPage";
-import MemoryDetailPage from "./pages/admin/MemoryDetailPage";
-import InvitesPage from "./pages/admin/InvitesPage";
-import InviteDetailPage from "./pages/admin/InviteDetailPage";
-import DreamTalesPage from "./pages/admin/DreamTalesPage";
-import DreamTaleDetailPage from "./pages/admin/DreamTaleDetailPage";
-import ReactionsPage from "./pages/admin/ReactionsPage";
-import HighlightsPage from "./pages/admin/HighlightsPage";
+import Dashboard from "./pages/Dashboard";
+import UsersPage from "./pages/UsersPage";
+import UserDetailPage from "./pages/UserDetailPage";
+import BabiesPage from "./pages/BabiesPage";
+import BabyDetailPage from "./pages/BabyDetailPage";
+import MemoriesPage from "./pages/MemoriesPage";
+import MemoryDetailPage from "./pages/MemoryDetailPage";
+import InvitesPage from "./pages/InvitesPage";
+import InviteDetailPage from "./pages/InviteDetailPage";
+import DreamTalesPage from "./pages/DreamTalesPage";
+import DreamTaleDetailPage from "./pages/DreamTaleDetailPage";
+import ReactionsPage from "./pages/ReactionsPage";
+import HighlightsPage from "./pages/HighlightsPage";
 // 1. Import your brand new Login page here (adjust path if needed)
-import { Login } from "./pages/admin/Login";
+import { Login } from "./pages/Login";
 
 function App() {
   // 2. Track authentication status via localStorage token

@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { Trash2, X, Eye, Pencil } from "lucide-react";
 import { Link } from "react-router-dom";
-import { PaginationControls } from "../../components/ui/PaginationControls";
-import { ConfirmDialog } from "../../components/ConfirmDialog";
-import { Skeleton } from "../../components/ui/skeleton";
-import { apiFetch } from "../../lib/api";
-import avtar from "../../public/default.jpg";
+import { PaginationControls } from "../components/ui/PaginationControls";
+import { ConfirmDialog } from "../components/ConfirmDialog";
+import { Skeleton } from "../components/ui/skeleton";
+import { apiFetch } from "../lib/api";
+import avtar from "../public/default.jpg";
 
 export default function BabiesPage() {
 

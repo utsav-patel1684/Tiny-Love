@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { Trash2, X, ExternalLink } from "lucide-react";
-import { PaginationControls } from "../../components/ui/PaginationControls";
-import { ConfirmDialog } from "../../components/ConfirmDialog";
-import { Skeleton } from "../../components/ui/skeleton";
-import { apiFetch } from "../../lib/api";
+import { PaginationControls } from "../components/ui/PaginationControls";
+import { ConfirmDialog } from "../components/ConfirmDialog";
+import { Skeleton } from "../components/ui/skeleton";
+import { apiFetch } from "../lib/api";
 
 export default function HighlightsPage() {
   const [highlights, setHighlights] = useState<any[]>([]);

@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from "react";
-import { Trash2, ExternalLink, X, Eye, Pencil } from "lucide-react";
+import { Trash2, X, Eye, Pencil } from "lucide-react";
 import { Link } from "react-router-dom";
-import { PaginationControls } from "../../components/ui/PaginationControls";
-import { ConfirmDialog } from "../../components/ConfirmDialog";
-import { Skeleton } from "../../components/ui/skeleton";
-import { apiFetch } from "../../lib/api";
-export default function MemoriesPage() {
+import { PaginationControls } from "../components/ui/PaginationControls";
+import { ConfirmDialog } from "../components/ConfirmDialog";
+import { Skeleton } from "../components/ui/skeleton";
+import { apiFetch, getServerUrl } from "../lib/api";
+import avtar from "../public/default.jpg";
 
-  const [memories, setMemories] = useState<any[]>([]);
+export default function DreamTalesPage() {
+
+  const [dreamTales, setDreamTales] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -19,45 +21,44 @@ export default function MemoriesPage() {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [confirmingId, setConfirmingId] = useState<string | null>(null);
 
-  const fetchMemories = async () => {
+  const fetchDreamTales = async () => {
     setLoading(true);
 
     try {
       const data = await apiFetch<any>(
-        `/admin/memories?page=${page}&limit=10`
+        `/admin/dream-tales?page=${page}&limit=10`
       );
 
-      setMemories(data.data ?? []);
+      setDreamTales(data.data ?? []);
       setTotalPages(data.totalPages ?? 1);
       setTotalRecords(data.total ?? 0);
       setError(null);
     } catch (err) {
       console.error(err);
-      setError("Failed to load memories data.");
+      setError("Failed to load dream tales data.");
     } finally {
       setLoading(false);
     }
   };
-
   useEffect(() => {
-    fetchMemories();
+    fetchDreamTales();
   }, [page]);
 
-  const deleteMemory = (memoryId: string) => {
-    setConfirmingId(memoryId);
+  const deleteDreamTale = (dreamTaleId: string) => {
+    setConfirmingId(dreamTaleId);
     setConfirmOpen(true);
   };
 
   const handleConfirmDelete = async () => {
     if (!confirmingId) return;
     try {
-      await apiFetch(`/admin/memories/${confirmingId}`, {
+      await apiFetch(`/admin/dream-tales/${confirmingId}`, {
         method: "DELETE",
       });
-      alert("Memory deleted successfully.");
-      fetchMemories();
+      alert("Dream Tale deleted successfully.");
+      fetchDreamTales();
     } catch {
-      alert("Failed to delete memory.");
+      alert("Failed to delete Dream Tale.");
     } finally {
       setConfirmOpen(false);
       setConfirmingId(null);
@@ -77,7 +78,7 @@ export default function MemoriesPage() {
         <div className="relative flex-1 max-w-md">
           <input
             type="text"
-            placeholder="Search memories..."
+            placeholder="Search dream tales..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full pl-4 pr-10 py-2 rounded-lg border border-border focus:outline-none focus:ring-2 focus:ring-primary text-sm bg-background text-foreground"
@@ -95,6 +96,7 @@ export default function MemoriesPage() {
           {loading ? "" : `Total ${totalRecords} Records.`}
         </div>
       </div>
+
       {error && (
         <div className="p-4 md:p-6 text-rose-600 bg-rose-50 border-b border-rose-100 text-sm">
           {error}
@@ -112,77 +114,91 @@ export default function MemoriesPage() {
           <table className="w-full min-w-[800px] text-left border-collapse text-sm">
             <thead>
               <tr className="border-b border-border text-xs font-semibold uppercase tracking-wider">
-                <th className="px-6 py-4">Memory Content</th>
-                <th className="px-6 py-4">Type</th>
-                <th className="px-6 py-4">Owner</th>
-                <th className="px-6 py-4">Baby</th>
-                <th className="px-6 py-4">Engagement</th>
-                {/* <th className="px-6 py-4">Created At</th> */}
+                <th className="px-6 py-4">Tale Details</th>
+                <th className="px-6 py-4">Configuration</th>
+                <th className="px-6 py-4">Associated Baby</th>
+                <th className="px-6 py-4">Created By</th>
+                <th className="px-6 py-4">Generated At</th>
                 <th className="px-6 py-4 text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
-              {memories.filter(m =>
-                m.caption?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                m.uploaderEmail?.toLowerCase().includes(searchQuery.toLowerCase())
-              ).map((m) => (
-                <tr key={m.id} className="hover:bg-muted/70 transition-colors">
-                  <td className="px-6 py-4 max-w-xs">
-                    <div className="font-semibold text-white truncate" title={m.caption}>
-                      {m.caption || <span className="a text-white">No caption</span>}
+              {dreamTales.filter(d =>
+                d.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                d.userName?.toLowerCase().includes(searchQuery.toLowerCase())
+              ).map((d) => (
+                <tr key={d.id} className="hover:bg-muted/70 transition-colors">
+                  <td className="px-6 py-4">
+                    <div className="flex items-center gap-4">
+                      <img
+                        src={d.coverImageUrl ? `${getServerUrl()}${d.coverImageUrl}` : avtar}
+                        alt={d.title || "Dream Tale"}
+                        className="w-16 h-16 rounded-lg object-cover border border-border shrink-0"
+                        onError={(e) => {
+                          e.currentTarget.onerror = null;
+                          e.currentTarget.src = avtar;
+                        }}
+                      />
+
+                      <div className="min-w-0">
+                        <div className="font-semibold text-white line-clamp-2">
+                          {d.title}
+                        </div>
+
+                        <div className="mt-1 flex items-center gap-2 text-xs text-white/70">
+                          {d.isFavorite && (
+                            <span className="text-amber-400 font-semibold">
+                              ★ Favorite
+                            </span>
+                          )}
+
+                          {d.durationSeconds && (
+                            <span>
+                              {Math.floor(d.durationSeconds / 60)}m{" "}
+                              {d.durationSeconds % 60}s
+                            </span>
+                          )}
+                        </div>
+                      </div>
                     </div>
+                  </td>
+                  <td className="px-6 py-4">
+                    <div className="flex items-center gap-3">
+                      <span className="text-xs text-white/70">Style: <span className="font-medium text-white">{d.storyStyle}</span></span>
+                      <span className="text-xs text-white/70">Voice: <span className="font-medium text-white">{d.voiceName}</span></span>
+                      <span className="text-xs text-white/70">Language: <span className="font-medium text-white">{d.language}</span></span>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4">
+                    <div className="font-medium text-white">{d.babyName}</div>
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-2">
-                      <span className={`inline-block px-2 py-0.5 rounded text-[10px] font-bold ${m.type === "photo" ? "bg-white/10 text-white" :
-                        m.type === "video" ? "bg-white/10 text-white" :
-                          "bg-white/10 text-white"
-                        }`}>
-                        {m.type}
-                      </span>
-                      {m.mediaUrl && (
-                        <a href={m.mediaUrl} target="_blank" rel="noreferrer" className="text-white/70 hover:text-white flex items-center gap-0.5 text-xs">
-                          Link <ExternalLink className="h-3 w-3" />
-                        </a>
-                      )}
+                      <span className="font-medium text-white">{d.userName}</span>
+                      <span className="text-xs text-white/70">({d.userEmail})</span>
                     </div>
                   </td>
-                  <td className="px-6 py-4">
-                    <div className="flex flex-row ">
-                      <span className="font-semibold text-white">{m.uploaderName || "Unknown"}</span>
-                      {/* <span className="text-xs text-white/70 font-mono">{m.uploaderEmail}</span> */}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <span className="font-semibold text-white">{m.babyName || "Unknown"}</span>
-                  </td>
-                  <td className="px-6 py-4 text-xs font-semibold text-white">
-                    <div className="flex items-center gap-3">
-                      <span>Comments: {m.commentCount}</span>
-                      <span>Reactions: {m.reactionCount}</span>
-                    </div>
-                  </td>
-                  {/* <td className="px-6 py-4 text-xs text-white/70">{formatDate(m.createdAt)}</td> */}
+                  <td className="px-6 py-4 text-xs text-white/70">{formatDate(d.createdAt)}</td>
                   <td className="px-6 py-4">
                     <div className="flex items-center justify-end gap-2">
                       <Link
-                        to={`/memories/${m.id}`}
+                        to={`/dream-tales/${d.id}`}
                         className="inline-flex items-center justify-center text-blue-400 hover:text-blue-600 hover:bg-blue-50 p-2 rounded-lg transition-colors cursor-pointer"
-                        title="View Memory"
+                        title="View Dream Tale"
                       >
                         <Eye className="h-4 w-4" />
                       </Link>
                       <Link
-                        to={`/memories/${m.id}`}
+                        to={`/dream-tales/${d.id}`}
                         className="inline-flex items-center justify-center text-amber-500 hover:text-amber-700 hover:bg-amber-50 p-2 rounded-lg transition-colors cursor-pointer"
-                        title="Edit Memory"
+                        title="Edit Dream Tale"
                       >
                         <Pencil className="h-4 w-4" />
                       </Link>
                       <button
-                        onClick={() => deleteMemory(m.id)}
+                        onClick={() => deleteDreamTale(d.id)}
                         className="inline-flex items-center justify-center text-red-400 hover:text-red-600 hover:bg-red-50 p-2 rounded-lg transition-colors cursor-pointer"
-                        title="Delete Memory"
+                        title="Delete Dream Tale"
                       >
                         <Trash2 className="h-4 w-4" />
                       </button>
@@ -190,10 +206,10 @@ export default function MemoriesPage() {
                   </td>
                 </tr>
               ))}
-              {memories.length === 0 && (
+              {dreamTales.length === 0 && (
                 <tr>
                   <td colSpan={6} className="px-6 py-8 text-center text-white/70">
-                    No memories found.
+                    No dream tales found.
                   </td>
                 </tr>
               )}
@@ -210,8 +226,8 @@ export default function MemoriesPage() {
 
       <ConfirmDialog
         open={confirmOpen}
-        title="Delete Memory"
-        description="Are you sure you want to delete this memory?"
+        title="Delete Dream Tale"
+        description="Are you sure you want to delete this Dream Tale?"
         confirmText="Delete"
         cancelText="Cancel"
         isDestructive={true}

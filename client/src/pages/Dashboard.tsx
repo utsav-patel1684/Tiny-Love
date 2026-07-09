@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Users, Baby, Heart, BookOpen, MessageSquare, Mail, Activity } from "lucide-react";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip as ChartTooltip, ResponsiveContainer } from "recharts";
 
-import { apiFetch } from "../../lib/api";
+import { apiFetch } from "../lib/api";
 
 export default function Dashboard() {
 

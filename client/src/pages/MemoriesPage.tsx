@@ -1,14 +1,13 @@
 import React, { useState, useEffect } from "react";
-import { Trash2, X, Eye } from "lucide-react";
+import { Trash2, ExternalLink, X, Eye, Pencil } from "lucide-react";
 import { Link } from "react-router-dom";
-import { PaginationControls } from "../../components/ui/PaginationControls";
-import { ConfirmDialog } from "../../components/ConfirmDialog";
-import { Skeleton } from "../../components/ui/skeleton";
-import { apiFetch } from "../../lib/api";
+import { PaginationControls } from "../components/ui/PaginationControls";
+import { ConfirmDialog } from "../components/ConfirmDialog";
+import { Skeleton } from "../components/ui/skeleton";
+import { apiFetch } from "../lib/api";
+export default function MemoriesPage() {
 
-export default function InvitesPage() {
-
-  const [invites, setInvites] = useState<any[]>([]);
+  const [memories, setMemories] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -20,45 +19,45 @@ export default function InvitesPage() {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [confirmingId, setConfirmingId] = useState<string | null>(null);
 
-  const fetchInvites = async () => {
+  const fetchMemories = async () => {
     setLoading(true);
 
     try {
       const data = await apiFetch<any>(
-        `/admin/invites?page=${page}&limit=10`
+        `/admin/memories?page=${page}&limit=10`
       );
 
-      setInvites(data.data ?? []);
+      setMemories(data.data ?? []);
       setTotalPages(data.totalPages ?? 1);
       setTotalRecords(data.total ?? 0);
       setError(null);
     } catch (err) {
       console.error(err);
-      setError("Failed to load invites data.");
+      setError("Failed to load memories data.");
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchInvites();
+    fetchMemories();
   }, [page]);
 
-  const revokeInvite = (inviteId: string) => {
-    setConfirmingId(inviteId);
+  const deleteMemory = (memoryId: string) => {
+    setConfirmingId(memoryId);
     setConfirmOpen(true);
   };
 
   const handleConfirmDelete = async () => {
     if (!confirmingId) return;
     try {
-      await apiFetch(`/admin/invites/${confirmingId}`, {
+      await apiFetch(`/admin/memories/${confirmingId}`, {
         method: "DELETE",
       });
-      alert("Invite revoked successfully.");
-      fetchInvites();
+      alert("Memory deleted successfully.");
+      fetchMemories();
     } catch {
-      alert("Failed to revoke invite.");
+      alert("Failed to delete memory.");
     } finally {
       setConfirmOpen(false);
       setConfirmingId(null);
@@ -78,7 +77,7 @@ export default function InvitesPage() {
         <div className="relative flex-1 max-w-md">
           <input
             type="text"
-            placeholder="Search invites..."
+            placeholder="Search memories..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full pl-4 pr-10 py-2 rounded-lg border border-border focus:outline-none focus:ring-2 focus:ring-primary text-sm bg-background text-foreground"
@@ -96,7 +95,6 @@ export default function InvitesPage() {
           {loading ? "" : `Total ${totalRecords} Records.`}
         </div>
       </div>
-
       {error && (
         <div className="p-4 md:p-6 text-rose-600 bg-rose-50 border-b border-rose-100 text-sm">
           {error}
@@ -114,62 +112,77 @@ export default function InvitesPage() {
           <table className="w-full min-w-[800px] text-left border-collapse text-sm">
             <thead>
               <tr className="border-b border-border text-xs font-semibold uppercase tracking-wider">
-                <th className="px-6 py-4">Token</th>
-                <th className="px-6 py-4">Invited Family Role</th>
-                <th className="px-6 py-4">Assigned Baby</th>
-                <th className="px-6 py-4">Details</th>
-
+                <th className="px-6 py-4">Memory Content</th>
+                <th className="px-6 py-4">Type</th>
+                <th className="px-6 py-4">Owner</th>
+                <th className="px-6 py-4">Baby</th>
+                <th className="px-6 py-4">Engagement</th>
+                {/* <th className="px-6 py-4">Created At</th> */}
                 <th className="px-6 py-4 text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
-              {invites.filter(i =>
-                i.invitedEmail?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                i.role?.toLowerCase().includes(searchQuery.toLowerCase())
-              ).map((i) => (
-                <tr key={i.id} className="hover:bg-muted/70 transition-colors">
-                  <td className="px-6 py-4">
-                    <div className="font-mono text-xs text-white/70">{i.token}</div>
+              {memories.filter(m =>
+                m.caption?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                m.uploaderEmail?.toLowerCase().includes(searchQuery.toLowerCase())
+              ).map((m) => (
+                <tr key={m.id} className="hover:bg-muted/70 transition-colors">
+                  <td className="px-6 py-4 max-w-xs">
+                    <div className="font-semibold text-white truncate" title={m.caption}>
+                      {m.caption || <span className="a text-white">No caption</span>}
+                    </div>
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-2">
-                      <span className="font-semibold text-white">{i.role}</span>
-                      <span className="inline-block px-1.5 py-0.5 rounded text-[10px] font-bold bg-white/10 text-white">
-                        {i.canManageContent ? "Can Upload / Edit" : "Viewer Only"}
+                      <span className={`inline-block px-2 py-0.5 rounded text-[10px] font-bold ${m.type === "photo" ? "bg-white/10 text-white" :
+                        m.type === "video" ? "bg-white/10 text-white" :
+                          "bg-white/10 text-white"
+                        }`}>
+                        {m.type}
                       </span>
+                      {m.mediaUrl && (
+                        <a href={m.mediaUrl} target="_blank" rel="noreferrer" className="text-white/70 hover:text-white flex items-center gap-0.5 text-xs">
+                          Link <ExternalLink className="h-3 w-3" />
+                        </a>
+                      )}
                     </div>
                   </td>
                   <td className="px-6 py-4">
-                    <div className="flex items-center gap-2">
-                      <span className="font-medium text-white">{i.babyName}</span>
-                      <span className="text-xs text-white/70">| Parent: {i.parentName}</span>
+                    <div className="flex flex-row ">
+                      <span className="font-semibold text-white">{m.uploaderName || "Unknown"}</span>
+                      {/* <span className="text-xs text-white/70 font-mono">{m.uploaderEmail}</span> */}
                     </div>
                   </td>
                   <td className="px-6 py-4">
+                    <span className="font-semibold text-white">{m.babyName || "Unknown"}</span>
+                  </td>
+                  <td className="px-6 py-4 text-xs font-semibold text-white">
                     <div className="flex items-center gap-3">
-                      {i.invitedEmail && <span className="text-xs font-mono text-white/70">Email: {i.invitedEmail}</span>}
-                      <div className="flex items-center gap-1.5">
-                        <span className={`h-2 w-2 rounded-full ${i.usedAt ? "bg-emerald-500" : "bg-amber-400"}`} />
-                        <span className="text-xs font-semibold text-white/70">
-                          {i.usedAt ? `Joined ${new Date(i.usedAt).toLocaleDateString()}` : "Pending"}
-                        </span>
-                      </div>
+                      <span>Comments: {m.commentCount}</span>
+                      <span>Reactions: {m.reactionCount}</span>
                     </div>
                   </td>
-
+                  {/* <td className="px-6 py-4 text-xs text-white/70">{formatDate(m.createdAt)}</td> */}
                   <td className="px-6 py-4">
                     <div className="flex items-center justify-end gap-2">
                       <Link
-                        to={`/invites/${i.id}`}
+                        to={`/memories/${m.id}`}
                         className="inline-flex items-center justify-center text-blue-400 hover:text-blue-600 hover:bg-blue-50 p-2 rounded-lg transition-colors cursor-pointer"
-                        title="View Invite"
+                        title="View Memory"
                       >
                         <Eye className="h-4 w-4" />
                       </Link>
+                      <Link
+                        to={`/memories/${m.id}`}
+                        className="inline-flex items-center justify-center text-amber-500 hover:text-amber-700 hover:bg-amber-50 p-2 rounded-lg transition-colors cursor-pointer"
+                        title="Edit Memory"
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </Link>
                       <button
-                        onClick={() => revokeInvite(i.id)}
+                        onClick={() => deleteMemory(m.id)}
                         className="inline-flex items-center justify-center text-red-400 hover:text-red-600 hover:bg-red-50 p-2 rounded-lg transition-colors cursor-pointer"
-                        title="Revoke Invite"
+                        title="Delete Memory"
                       >
                         <Trash2 className="h-4 w-4" />
                       </button>
@@ -177,10 +190,10 @@ export default function InvitesPage() {
                   </td>
                 </tr>
               ))}
-              {invites.length === 0 && (
+              {memories.length === 0 && (
                 <tr>
                   <td colSpan={6} className="px-6 py-8 text-center text-white/70">
-                    No invites found.
+                    No memories found.
                   </td>
                 </tr>
               )}
@@ -197,9 +210,9 @@ export default function InvitesPage() {
 
       <ConfirmDialog
         open={confirmOpen}
-        title="Revoke Invite"
-        description="Are you sure you want to revoke this invite?"
-        confirmText="Revoke"
+        title="Delete Memory"
+        description="Are you sure you want to delete this memory?"
+        confirmText="Delete"
         cancelText="Cancel"
         isDestructive={true}
         onConfirm={handleConfirmDelete}

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { apiFetch } from "../../lib/api";
+import { apiFetch } from "../lib/api";
 import { Loader2, ExternalLink } from "lucide-react";
 
 export default function MemoryDetailPage() {

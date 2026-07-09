@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { Trash2, X } from "lucide-react";
-import { PaginationControls } from "../../components/ui/PaginationControls";
-import { ConfirmDialog } from "../../components/ConfirmDialog";
-import { Skeleton } from "../../components/ui/skeleton";
-import { apiFetch } from "../../lib/api";
+import { PaginationControls } from "../components/ui/PaginationControls";
+import { ConfirmDialog } from "../components/ConfirmDialog";
+import { Skeleton } from "../components/ui/skeleton";
+import { apiFetch } from "../lib/api";
 
 export default function ReactionsPage() {
   const [reactions, setReactions] = useState<any[]>([]);

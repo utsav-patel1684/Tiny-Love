@@ -1,15 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { Trash2, X, Eye, Pencil } from "lucide-react";
 import { Link } from "react-router-dom";
-import { PaginationControls } from "../../components/ui/PaginationControls";
-import { ConfirmDialog } from "../../components/ConfirmDialog";
-import { Skeleton } from "../../components/ui/skeleton";
-import { apiFetch, getServerUrl } from "../../lib/api";
-import avtar from "../../public/default.jpg";
+import { PaginationControls } from "../components/ui/PaginationControls";
+import { ConfirmDialog } from "../components/ConfirmDialog";
+import { Skeleton } from "../components/ui/skeleton";
+import { apiFetch, getServerUrl } from "../lib/api";
+import avtar from "../public/default.jpg";
+export default function UsersPage() {
 
-export default function DreamTalesPage() {
-
-  const [dreamTales, setDreamTales] = useState<any[]>([]);
+  const [users, setUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -21,44 +20,43 @@ export default function DreamTalesPage() {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [confirmingId, setConfirmingId] = useState<string | null>(null);
 
-  const fetchDreamTales = async () => {
+  const fetchUsers = async () => {
     setLoading(true);
-
     try {
       const data = await apiFetch<any>(
-        `/admin/dream-tales?page=${page}&limit=10`
+        `/admin/users?page=${page}&limit=10`
       );
-
-      setDreamTales(data.data ?? []);
-      setTotalPages(data.totalPages ?? 1);
-      setTotalRecords(data.total ?? 0);
+      setUsers(data.data);
+      setTotalPages(data.totalPages);
+      setTotalRecords(data.total);
       setError(null);
     } catch (err) {
       console.error(err);
-      setError("Failed to load dream tales data.");
+      setError("Failed to load users data.");
     } finally {
       setLoading(false);
     }
   };
+
   useEffect(() => {
-    fetchDreamTales();
+    fetchUsers();
   }, [page]);
 
-  const deleteDreamTale = (dreamTaleId: string) => {
-    setConfirmingId(dreamTaleId);
+  const deleteUser = (userId: string) => {
+    setConfirmingId(userId);
     setConfirmOpen(true);
   };
 
   const handleConfirmDelete = async () => {
     if (!confirmingId) return;
     try {
-      await apiFetch(`/admin/dream-tales/${confirmingId}`, {
+      await apiFetch(`/admin/users/${confirmingId}`, {
         method: "DELETE",
       });
-      alert("Dream Tale deleted successfully.");
-      fetchDreamTales();
+      alert("User deleted successfully.");
+      fetchUsers(); // Refresh current page
     } catch {
-      alert("Failed to delete Dream Tale.");
+      alert("Failed to delete user.");
     } finally {
       setConfirmOpen(false);
       setConfirmingId(null);
@@ -74,11 +72,12 @@ export default function DreamTalesPage() {
 
   return (
     <div className="bg-card rounded-xl border border-border shadow-sm overflow-hidden animate-fadeIn">
+      {/* Table search & filter header */}
       <div className="p-4 md:p-6 border-b border-border flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="relative flex-1 max-w-md">
           <input
             type="text"
-            placeholder="Search dream tales..."
+            placeholder="Search users..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full pl-4 pr-10 py-2 rounded-lg border border-border focus:outline-none focus:ring-2 focus:ring-primary text-sm bg-background text-foreground"
@@ -103,102 +102,101 @@ export default function DreamTalesPage() {
         </div>
       )}
 
+      {/* Table Area */}
       {loading ? (
-        <div className="py-10 space-y-4 w-full">
+        <div className="p-4 md:p-6 space-y-4 w-full">
           {[1, 2, 3, 4, 5, 6].map((i) => (
             <Skeleton key={i} className="h-14 w-full rounded-md" />
           ))}
         </div>
       ) : (
         <div className="overflow-x-auto overflow-y-hidden w-full">
-          <table className="w-full min-w-[800px] text-left border-collapse text-sm">
+          <table className="w-full min-w-[800px] text-left text-sm whitespace-nowrap">
             <thead>
               <tr className="border-b border-border text-xs font-semibold uppercase tracking-wider">
-                <th className="px-6 py-4">Tale Details</th>
-                <th className="px-6 py-4">Configuration</th>
-                <th className="px-6 py-4">Associated Baby</th>
-                <th className="px-6 py-4">Created By</th>
-                <th className="px-6 py-4">Generated At</th>
+                <th className="px-6 py-4">User Details</th>
+                <th className="px-6 py-4">Status & Provider</th>
+                <th className="px-6 py-4">Preferences</th>
+                <th className="px-6 py-4">Baby Owned</th>
+                <th className="px-6 py-4">Registered At</th>
                 <th className="px-6 py-4 text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
-              {dreamTales.filter(d =>
-                d.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                d.userName?.toLowerCase().includes(searchQuery.toLowerCase())
-              ).map((d) => (
-                <tr key={d.id} className="hover:bg-muted/70 transition-colors">
+              {users.filter(u =>
+                u.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                u.email?.toLowerCase().includes(searchQuery.toLowerCase())
+              ).map((u) => (
+                <tr key={u.id} className="hover:bg-muted/70 transition-colors">
                   <td className="px-6 py-4">
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-3">
                       <img
-                        src={d.coverImageUrl ? `${getServerUrl()}${d.coverImageUrl}` : avtar}
-                        alt={d.title || "Dream Tale"}
-                        className="w-16 h-16 rounded-lg object-cover border border-border shrink-0"
-                        onError={(e) => {
-                          e.currentTarget.onerror = null;
-                          e.currentTarget.src = avtar;
+                        src={
+                          u.profileImage
+                            ? (u.profileImage.startsWith('http') 
+                                ? u.profileImage 
+                                : `${getServerUrl()}${u.profileImage.startsWith('/') ? '' : '/'}${u.profileImage}`)
+                            : avtar
+                        }
+                        referrerPolicy="no-referrer"
+                        alt={u.name || "User avatar"}
+                        className="w-10 h-10 rounded-full object-cover border border-white/20"
+                        onError={(event) => {
+                          event.currentTarget.onerror = null;
+                          event.currentTarget.src = avtar;
                         }}
                       />
 
-                      <div className="min-w-0">
-                        <div className="font-semibold text-white line-clamp-2">
-                          {d.title}
-                        </div>
-
-                        <div className="mt-1 flex items-center gap-2 text-xs text-white/70">
-                          {d.isFavorite && (
-                            <span className="text-amber-400 font-semibold">
-                              ★ Favorite
-                            </span>
-                          )}
-
-                          {d.durationSeconds && (
-                            <span>
-                              {Math.floor(d.durationSeconds / 60)}m{" "}
-                              {d.durationSeconds % 60}s
-                            </span>
-                          )}
-                        </div>
+                      <div className="flex flex-col">
+                        <span className="font-semibold text-white">{u.name}</span>
+                        <span className="text-xs text-white/70 font-mono">
+                          {u.email}
+                        </span>
                       </div>
                     </div>
                   </td>
                   <td className="px-6 py-4">
-                    <div className="flex items-center gap-3">
-                      <span className="text-xs text-white/70">Style: <span className="font-medium text-white">{d.storyStyle}</span></span>
-                      <span className="text-xs text-white/70">Voice: <span className="font-medium text-white">{d.voiceName}</span></span>
-                      <span className="text-xs text-white/70">Language: <span className="font-medium text-white">{d.language}</span></span>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="font-medium text-white">{d.babyName}</div>
-                  </td>
-                  <td className="px-6 py-4">
                     <div className="flex items-center gap-2">
-                      <span className="font-medium text-white">{d.userName}</span>
-                      <span className="text-xs text-white/70">({d.userEmail})</span>
+                      <div className="flex items-center gap-1.5">
+                        <span className={`h-2 w-2 rounded-full ${u.emailVerified ? "bg-emerald-500" : "bg-amber-400"}`} />
+                        <span className="text-xs font-medium text-white/70">
+                          {u.emailVerified ? "Verified" : "Pending "}
+                        </span>
+                      </div>
+                      <span className="inline-block px-2 py-0.5 rounded text-[12px] font-bold  text-white">
+                        {u.authProvider}
+                      </span>
                     </div>
                   </td>
-                  <td className="px-6 py-4 text-xs text-white/70">{formatDate(d.createdAt)}</td>
+                  <td className="px-6 py-4 text-xs font-medium text-white">
+                    <div className="flex items-center gap-3">
+                      <span><span className="inline-block px-1.5 py-0.5 rounded text-[12px] font-bold  text-white">{u.subscriptionStatus || "free"}</span></span>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 text-xs text-white">
+                    <div> <span className="font-semibold text-white">{u.babyCount}</span></div>
+                  </td>
+                  <td className="px-6 py-4 text-xs text-white">{formatDate(u.createdAt)}</td>
                   <td className="px-6 py-4">
                     <div className="flex items-center justify-end gap-2">
                       <Link
-                        to={`/dream-tales/${d.id}`}
+                        to={`/users/${u.id}`}
                         className="inline-flex items-center justify-center text-blue-400 hover:text-blue-600 hover:bg-blue-50 p-2 rounded-lg transition-colors cursor-pointer"
-                        title="View Dream Tale"
+                        title="View User"
                       >
                         <Eye className="h-4 w-4" />
                       </Link>
                       <Link
-                        to={`/dream-tales/${d.id}`}
+                        to={`/users/${u.id}`}
                         className="inline-flex items-center justify-center text-amber-500 hover:text-amber-700 hover:bg-amber-50 p-2 rounded-lg transition-colors cursor-pointer"
-                        title="Edit Dream Tale"
+                        title="Edit User"
                       >
                         <Pencil className="h-4 w-4" />
                       </Link>
                       <button
-                        onClick={() => deleteDreamTale(d.id)}
+                        onClick={() => deleteUser(u.id)}
                         className="inline-flex items-center justify-center text-red-400 hover:text-red-600 hover:bg-red-50 p-2 rounded-lg transition-colors cursor-pointer"
-                        title="Delete Dream Tale"
+                        title="Delete User"
                       >
                         <Trash2 className="h-4 w-4" />
                       </button>
@@ -206,10 +204,10 @@ export default function DreamTalesPage() {
                   </td>
                 </tr>
               ))}
-              {dreamTales.length === 0 && (
+              {users.length === 0 && (
                 <tr>
                   <td colSpan={6} className="px-6 py-8 text-center text-white/70">
-                    No dream tales found.
+                    No users found.
                   </td>
                 </tr>
               )}
@@ -218,6 +216,7 @@ export default function DreamTalesPage() {
         </div>
       )}
 
+      {/* Pagination Controls */}
       <PaginationControls
         currentPage={page}
         totalPages={totalPages}
@@ -226,8 +225,8 @@ export default function DreamTalesPage() {
 
       <ConfirmDialog
         open={confirmOpen}
-        title="Delete Dream Tale"
-        description="Are you sure you want to delete this Dream Tale?"
+        title="Delete User"
+        description="WARNING: Deleting this user will cascade-delete all their baby profiles, memories, invites, reactions, comments, and push tokens. Proceed?"
         confirmText="Delete"
         cancelText="Cancel"
         isDestructive={true}
