@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import { PaginationControls } from "../components/ui/PaginationControls";
 import { ConfirmDialog } from "../components/ConfirmDialog";
 import { Skeleton } from "../components/ui/skeleton";
-import { apiFetch } from "../lib/api";
+import { apiFetch, getServerUrl } from "../lib/api";
 export default function MemoriesPage() {
 
   const [memories, setMemories] = useState<any[]>([]);
@@ -112,11 +112,11 @@ export default function MemoriesPage() {
           <table className="w-full min-w-[800px] text-left border-collapse text-sm">
             <thead>
               <tr className="border-b border-border text-xs font-semibold uppercase tracking-wider">
-                <th className="px-6 py-4">Memory Content</th>
+                <th className="px-6 py-4">Memory Description</th>
                 <th className="px-6 py-4">Type</th>
                 <th className="px-6 py-4">Owner</th>
                 <th className="px-6 py-4">Baby</th>
-                <th className="px-6 py-4">Engagement</th>
+
                 {/* <th className="px-6 py-4">Created At</th> */}
                 <th className="px-6 py-4 text-right">Actions</th>
               </tr>
@@ -141,9 +141,29 @@ export default function MemoriesPage() {
                         {m.type}
                       </span>
                       {m.mediaUrl && (
-                        <a href={m.mediaUrl} target="_blank" rel="noreferrer" className="text-white/70 hover:text-white flex items-center gap-0.5 text-xs">
-                          Link <ExternalLink className="h-3 w-3" />
-                        </a>
+                        <div className="mt-2 flex items-center gap-2">
+                          {(() => {
+                            const rawUrl = m.mediaUrl;
+                            const url = rawUrl.startsWith('http') ? rawUrl : `${getServerUrl()}${rawUrl.startsWith('/') ? '' : '/'}${rawUrl}`;
+                            const type = m.type || "";
+                            const lowerUrl = url.toLowerCase();
+
+                            const isVid = type === "video" || lowerUrl.match(/\.(mp4|webm|ogg|mov)$/i);
+                            const isAud = type === "audio" || lowerUrl.match(/\.(mp3|wav|m4a)$/i);
+                            const isImg = type === "photo" || type === "image" || lowerUrl.match(/\.(jpeg|jpg|gif|png|webp)$/i);
+
+                            if (isVid) {
+                              return <video src={url} controls className="w-32 rounded bg-black/20" preload="none" />;
+                            } else if (isAud) {
+                              return <audio src={url} controls className="w-32 h-8" preload="none" />;
+                            } else if (isImg) {
+                              return <img src={url} alt="memory preview" className="w-12 h-12 object-cover rounded border border-white/20" />;
+                            } else {
+                              {/* Fallback to a playable video element for unknown media types so the user can always play them */ }
+                              return <video src={url} controls className="w-32 rounded bg-black/20" preload="none" />;
+                            }
+                          })()}
+                        </div>
                       )}
                     </div>
                   </td>
@@ -156,24 +176,19 @@ export default function MemoriesPage() {
                   <td className="px-6 py-4">
                     <span className="font-semibold text-white">{m.babyName || "Unknown"}</span>
                   </td>
-                  <td className="px-6 py-4 text-xs font-semibold text-white">
-                    <div className="flex items-center gap-3">
-                      <span>Comments: {m.commentCount}</span>
-                      <span>Reactions: {m.reactionCount}</span>
-                    </div>
-                  </td>
+
                   {/* <td className="px-6 py-4 text-xs text-white/70">{formatDate(m.createdAt)}</td> */}
                   <td className="px-6 py-4">
                     <div className="flex items-center justify-end gap-2">
                       <Link
-                        to={`/memories/${m.id}`}
+                        to={`/memories/${m.id}?mode=view`}
                         className="inline-flex items-center justify-center text-blue-400 hover:text-blue-600 hover:bg-blue-50 p-2 rounded-lg transition-colors cursor-pointer"
                         title="View Memory"
                       >
                         <Eye className="h-4 w-4" />
                       </Link>
                       <Link
-                        to={`/memories/${m.id}`}
+                        to={`/memories/${m.id}?mode=edit`}
                         className="inline-flex items-center justify-center text-amber-500 hover:text-amber-700 hover:bg-amber-50 p-2 rounded-lg transition-colors cursor-pointer"
                         title="Edit Memory"
                       >

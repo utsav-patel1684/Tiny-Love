@@ -140,7 +140,7 @@ export default function UsersPage() {
                         }
                         referrerPolicy="no-referrer"
                         alt={u.name || "User avatar"}
-                        className="w-10 h-10 rounded-full object-cover border border-white/20"
+                        className="w-10 h-10 min-w-10 min-h-10 shrink-0 rounded-full object-cover border border-white/20"
                         onError={(event) => {
                           event.currentTarget.onerror = null;
                           event.currentTarget.src = avtar;

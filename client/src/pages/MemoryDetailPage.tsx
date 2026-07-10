@@ -1,11 +1,58 @@
 import React, { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import { apiFetch } from "../lib/api";
-import { Loader2, ExternalLink } from "lucide-react";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
+import { apiFetch, getServerUrl } from "../lib/api";
+import { Loader2, ExternalLink, ChevronLeft } from "lucide-react";
 
 export default function MemoryDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
+  const isViewMode = location.search.includes("mode=view");
+
+  const MediaRenderer = ({ formData, memory }: { formData: any; memory: any }) => {
+    const hasMedia = !!formData.media_url;
+    const hasThumb = !!formData.thumbnail_url;
+
+    if (!hasMedia && !hasThumb) {
+      return <p className="text-sm text-muted-foreground italic">No media attached.</p>;
+    }
+
+    const getFullUrl = (raw: string) => raw.startsWith('http') ? raw : `${getServerUrl()}${raw.startsWith('/') ? '' : '/'}${raw}`;
+
+    const mediaUrl = hasMedia ? getFullUrl(formData.media_url) : "";
+    const thumbUrl = hasThumb ? getFullUrl(formData.thumbnail_url) : "";
+
+    if (hasMedia) {
+      const type = memory?.type || "";
+      const lowerUrl = mediaUrl.toLowerCase();
+      const isVid = type === "video" || lowerUrl.match(/\.(mp4|webm|ogg|mov)$/i);
+      const isAud = type === "audio" || lowerUrl.match(/\.(mp3|wav|m4a)$/i);
+      const isImg = type === "photo" || type === "image" || lowerUrl.match(/\.(jpeg|jpg|gif|png|webp)$/i);
+
+      if (isVid || (!isAud && !isImg)) {
+        return (
+          <video
+            src={mediaUrl}
+            poster={thumbUrl || undefined}
+            controls
+            className="w-full max-h-96 rounded border border-border bg-black/5 object-contain"
+            preload="none"
+          />
+        );
+      } else if (isAud) {
+        return (
+          <div className="space-y-4">
+            {thumbUrl && <img src={thumbUrl} alt="Thumbnail" className="w-full max-h-64 object-contain rounded border border-border bg-black/5" />}
+            <audio src={mediaUrl} controls className="w-full" preload="none" />
+          </div>
+        );
+      } else if (isImg) {
+        return <img src={mediaUrl} alt="Media" className="w-full max-h-96 object-contain rounded border border-border bg-black/5" />;
+      }
+    }
+
+    return <img src={thumbUrl} alt="Thumbnail" className="w-full max-h-96 object-contain rounded border border-border bg-black/5" />;
+  };
 
   const [memory, setMemory] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -89,167 +136,178 @@ export default function MemoryDetailPage() {
     <div className="space-y-6 max-w-4xl animate-fadeIn">
       <div className="flex items-center justify-between">
         <div>
-          <button 
-            onClick={() => navigate(-1)} 
-            className="text-sm text-gray-500 hover:text-gray-900 mb-2 flex items-center gap-1 transition-colors"
-          >
-            &larr; Back
-          </button>
+          <div className="flex items-center mb-2">
+            <button
+              onClick={() => navigate(-1)}
+              className="text-[14px] text-white cursor-pointer flex items-center gap-1 transition-colors"
+            >
+              <ChevronLeft />
+              Back
+            </button>
+
+            <h1 className="text-xl mx-4 font-bold tracking-tight text-foreground">
+              Memory Details
+            </h1>
+          </div>
           <div className="flex items-center gap-4">
-            {memory.thumbnail_url && (
-              <img 
-                src={memory.thumbnail_url} 
-                alt="Thumbnail" 
-                className="w-16 h-16 rounded object-cover shadow-sm border border-border"
-              />
-            )}
-            <div>
-              <h1 className="text-2xl font-bold tracking-tight text-foreground">Memory Details</h1>
-              <p className="text-muted-foreground text-sm">
-                ID: <span className="font-mono">{memory.id}</span>
-              </p>
-            </div>
           </div>
         </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* Read Only Stats Panel */}
-        <div className="bg-card shadow-sm rounded-xl border border-border p-6 space-y-4 h-fit">
-          <h3 className="font-semibold text-lg border-b border-border pb-2 text-foreground">Stats & Info</h3>
-          
-          <div>
-            <p className="text-xs text-muted-foreground">Type</p>
-            <p className="font-medium text-foreground uppercase text-sm">{memory.type || "Unknown"}</p>
-          </div>
+        {/* Left Column (Main Content) */}
+        <div className="md:col-span-2">
+          {isViewMode ? (
+            <div className="bg-card shadow-sm rounded-xl border border-border p-6 h-fit space-y-4">
+              <h3 className="font-semibold text-lg border-b border-border pb-2 text-foreground">Media</h3>
+              <MediaRenderer formData={formData} memory={memory} />
 
-          <div>
-            <p className="text-xs text-muted-foreground">Baby</p>
-            <p className="font-medium text-foreground">{memory.babyName || "Unknown"}</p>
-          </div>
-          
-          <div>
-            <p className="text-xs text-muted-foreground">Uploader</p>
-            <p className="font-medium text-foreground">{memory.uploaderName || "Unknown"}</p>
-            <p className="text-xs text-muted-foreground">{memory.uploaderEmail}</p>
-          </div>
-          
-          <div>
-            <p className="text-xs text-muted-foreground">Created At</p>
-            <p className="font-medium text-foreground">
-              {new Date(memory.created_at).toLocaleDateString()}
-            </p>
-          </div>
-          
-          <div className="flex items-center justify-between pt-2">
-            <div>
-              <p className="text-xs text-muted-foreground">Reactions</p>
-              <p className="font-medium text-foreground">{memory.reactionCount || 0}</p>
+              <div className="pt-4 border-border space-y-4">
+                <div>
+
+                  <p className="font-medium text-foreground mt-1 text-sm">
+                    {formData.caption || <span className="italic text-muted-foreground"></span>}
+                  </p>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div>
+                    <p className="text-xs text-muted-foreground">Reactions</p>
+                    <p className="font-medium text-foreground">{memory.reactionCount || 0}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">Comments</p>
+                    <p className="font-medium text-foreground">{memory.commentCount || 0}</p>
+                  </div>
+                </div>
+              </div>
             </div>
-            <div>
-              <p className="text-xs text-muted-foreground">Comments</p>
-              <p className="font-medium text-foreground">{memory.commentCount || 0}</p>
+          ) : (
+            <div className="bg-card shadow-sm rounded-xl border border-border p-6 h-fit">
+              <form onSubmit={handleSave} className="space-y-4">
+                <h3 className="font-semibold text-lg border-b border-border pb-2 text-foreground mb-4">Edit Memory</h3>
+
+                <div className="space-y-4">
+                  <div className="space-y-1">
+                    <label className="text-sm font-medium text-foreground">Caption</label>
+                    <textarea
+                      name="caption"
+                      value={formData.caption}
+                      onChange={handleChange}
+                      rows={3}
+                      className="w-full p-2 border border-border rounded-lg bg-background text-foreground resize-none"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="space-y-1">
+                      <label className="text-sm font-medium text-foreground">Category</label>
+                      <select
+                        name="category"
+                        value={formData.category}
+                        onChange={handleChange}
+                        className="w-full p-2 border border-border rounded-lg bg-background text-foreground"
+                      >
+                        <option value="everyday">Everyday</option>
+                        <option value="milestone">Milestone</option>
+                        <option value="special">Special</option>
+                      </select>
+                    </div>
+
+                    <div className="space-y-1">
+                      <label className="text-sm font-medium text-foreground">Visibility</label>
+                      <select
+                        name="visibility"
+                        value={formData.visibility}
+                        onChange={handleChange}
+                        className="w-full p-2 border border-border rounded-lg bg-background text-foreground"
+                      >
+                        <option value="family">Family</option>
+                        <option value="private">Private</option>
+                        <option value="public">Public</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="pt-4 border-t border-border flex justify-end">
+                  <button
+                    type="submit"
+                    disabled={saving}
+                    className="bg-primary hover:bg-primary/90 text-primary-foreground px-6 py-2 rounded-lg font-medium transition-colors flex items-center gap-2"
+                  >
+                    {saving && <Loader2 className="w-4 h-4 animate-spin" />}
+                    {saving ? "Saving..." : "Save Changes"}
+                  </button>
+                </div>
+              </form>
             </div>
-          </div>
+          )}
         </div>
 
-        {/* Edit Form */}
-        <div className="md:col-span-2 bg-card shadow-sm rounded-xl border border-border p-6">
-          <form onSubmit={handleSave} className="space-y-4">
-            <h3 className="font-semibold text-lg border-b border-border pb-2 text-foreground mb-4">Edit Memory</h3>
-            
-            <div className="space-y-4">
-              <div className="space-y-1">
-                <label className="text-sm font-medium text-foreground">Caption</label>
-                <textarea
-                  name="caption"
-                  value={formData.caption}
-                  onChange={handleChange}
-                  rows={3}
-                  className="w-full p-2 border border-border rounded-lg bg-background text-foreground resize-none"
-                />
-              </div>
+        {/* Right Column (Stats) */}
+        <div className="flex flex-col gap-6">
+          {/* Stats & Info */}
+          <div className="bg-card shadow-sm rounded-xl border border-border p-6 space-y-4 h-fit">
+            <h3 className="font-semibold text-lg border-b border-border pb-2 text-foreground">Stats & Info</h3>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="space-y-1">
-                  <label className="text-sm font-medium text-foreground">Category</label>
-                  <select
-                    name="category"
-                    value={formData.category}
-                    onChange={handleChange}
-                    className="w-full p-2 border border-border rounded-lg bg-background text-foreground"
-                  >
-                    <option value="everyday">Everyday</option>
-                    <option value="milestone">Milestone</option>
-                    <option value="special">Special</option>
-                  </select>
-                </div>
-
-                <div className="space-y-1">
-                  <label className="text-sm font-medium text-foreground">Visibility</label>
-                  <select
-                    name="visibility"
-                    value={formData.visibility}
-                    onChange={handleChange}
-                    className="w-full p-2 border border-border rounded-lg bg-background text-foreground"
-                  >
-                    <option value="family">Family</option>
-                    <option value="private">Private</option>
-                    <option value="public">Public</option>
-                  </select>
-                </div>
-              </div>
-
-              <div className="space-y-1">
-                <label className="text-sm font-medium text-foreground flex justify-between">
-                  Thumbnail URL
-                  {formData.thumbnail_url && (
-                    <a href={formData.thumbnail_url} target="_blank" rel="noreferrer" className="text-primary hover:underline text-xs flex items-center gap-1">
-                      View <ExternalLink className="h-3 w-3" />
-                    </a>
-                  )}
-                </label>
-                <input
-                  type="url"
-                  name="thumbnail_url"
-                  value={formData.thumbnail_url}
-                  onChange={handleChange}
-                  className="w-full p-2 border border-border rounded-lg bg-background text-foreground"
-                  placeholder="https://..."
-                />
-              </div>
-
-              <div className="space-y-1">
-                <label className="text-sm font-medium text-foreground flex justify-between">
-                  Media URL
-                  {formData.media_url && (
-                    <a href={formData.media_url} target="_blank" rel="noreferrer" className="text-primary hover:underline text-xs flex items-center gap-1">
-                      View <ExternalLink className="h-3 w-3" />
-                    </a>
-                  )}
-                </label>
-                <input
-                  type="url"
-                  name="media_url"
-                  value={formData.media_url}
-                  onChange={handleChange}
-                  className="w-full p-2 border border-border rounded-lg bg-background text-foreground"
-                  placeholder="https://..."
-                />
-              </div>
+            <div>
+              <p className="text-xs text-muted-foreground">Type</p>
+              <p className="font-medium text-foreground uppercase text-sm">{memory.type || "Unknown"}</p>
             </div>
 
-            <div className="pt-4 border-t border-border flex justify-end">
-              <button
-                type="submit"
-                disabled={saving}
-                className="bg-primary hover:bg-primary/90 text-primary-foreground px-6 py-2 rounded-lg font-medium transition-colors flex items-center gap-2"
-              >
-                {saving && <Loader2 className="w-4 h-4 animate-spin" />}
-                {saving ? "Saving..." : "Save Changes"}
-              </button>
+            <div>
+              <p className="text-xs text-muted-foreground">Baby</p>
+              <p className="font-medium text-foreground">{memory.babyName || "Unknown"}</p>
             </div>
-          </form>
+
+            <div>
+              <p className="text-xs text-muted-foreground">Uploader</p>
+              <p className="font-medium text-foreground">{memory.uploaderName || "Unknown"}</p>
+
+            </div>
+
+            <div>
+              <p className="text-xs text-muted-foreground">Created At</p>
+              <p className="font-medium text-foreground">
+                {new Date(memory.created_at).toLocaleDateString()}
+              </p>
+            </div>
+
+            {isViewMode && (
+              <div className="pt-4 border-border space-y-4">
+
+                <div className="flex items-center gap-4">
+                  <div>
+                    <p className="text-xs text-muted-foreground">Category</p>
+                    <p className="font-medium text-foreground capitalize text-sm">{formData.category}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">Visibility</p>
+                    <p className="font-medium text-foreground capitalize text-sm">{formData.visibility}</p>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* If NOT in view mode, show Media Preview on the right */}
+          {!isViewMode && (
+            <div className="bg-card shadow-sm rounded-xl border border-border p-6 space-y-4 h-fit">
+              <h3 className="font-semibold text-lg border-b border-border pb-2 text-foreground">Media</h3>
+              <MediaRenderer formData={formData} memory={memory} />
+
+              <div className="pt-4 border-t border-border flex items-center gap-6">
+                <div>
+                  <p className="text-xs text-muted-foreground">Reactions</p>
+                  <p className="font-medium text-foreground">{memory.reactionCount || 0}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Comments</p>
+                  <p className="font-medium text-foreground">{memory.commentCount || 0}</p>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>
