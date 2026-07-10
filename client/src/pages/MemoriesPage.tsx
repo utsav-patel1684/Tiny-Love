@@ -5,8 +5,10 @@ import { PaginationControls } from "../components/ui/PaginationControls";
 import { ConfirmDialog } from "../components/ConfirmDialog";
 import { Skeleton } from "../components/ui/skeleton";
 import { apiFetch, getServerUrl } from "../lib/api";
-export default function MemoriesPage() {
+import { useToast } from "@/hooks/use-toast";
 
+export default function MemoriesPage() {
+  const { toast } = useToast();
   const [memories, setMemories] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
@@ -54,10 +56,17 @@ export default function MemoriesPage() {
       await apiFetch(`/admin/memories/${confirmingId}`, {
         method: "DELETE",
       });
-      alert("Memory deleted successfully.");
+      toast({
+        title: "Success",
+        description: "Memory deleted successfully.",
+      });
       fetchMemories();
     } catch {
-      alert("Failed to delete memory.");
+      toast({
+        title: "Error",
+        description: "Failed to delete memory.",
+        variant: "destructive"
+      });
     } finally {
       setConfirmOpen(false);
       setConfirmingId(null);
@@ -116,8 +125,7 @@ export default function MemoriesPage() {
                 <th className="px-6 py-4">Type</th>
                 <th className="px-6 py-4">Owner</th>
                 <th className="px-6 py-4">Baby</th>
-
-                {/* <th className="px-6 py-4">Created At</th> */}
+                <th className="px-6 py-4">Created At</th>
                 <th className="px-6 py-4 text-right">Actions</th>
               </tr>
             </thead>
@@ -134,7 +142,7 @@ export default function MemoriesPage() {
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-2">
-                      <span className={`inline-block px-2 py-0.5 rounded text-[10px] font-bold ${m.type === "photo" ? "bg-white/10 text-white" :
+                      <span className={`inline-block px-2 py-0.5 rounded text-[13px] font-bold ${m.type === "photo" ? "bg-white/10 text-white" :
                         m.type === "video" ? "bg-white/10 text-white" :
                           "bg-white/10 text-white"
                         }`}>
@@ -159,7 +167,6 @@ export default function MemoriesPage() {
                             } else if (isImg) {
                               return <img src={url} alt="memory preview" className="w-12 h-12 object-cover rounded border border-white/20" />;
                             } else {
-                              {/* Fallback to a playable video element for unknown media types so the user can always play them */ }
                               return <video src={url} controls className="w-32 rounded bg-black/20" preload="none" />;
                             }
                           })()}
@@ -170,14 +177,12 @@ export default function MemoriesPage() {
                   <td className="px-6 py-4">
                     <div className="flex flex-row ">
                       <span className="font-semibold text-white">{m.uploaderName || "Unknown"}</span>
-                      {/* <span className="text-xs text-white/70 font-mono">{m.uploaderEmail}</span> */}
                     </div>
                   </td>
                   <td className="px-6 py-4">
                     <span className="font-semibold text-white">{m.babyName || "Unknown"}</span>
                   </td>
-
-                  {/* <td className="px-6 py-4 text-xs text-white/70">{formatDate(m.createdAt)}</td> */}
+                  <td className="px-6 py-4 text-xs text-white">{formatDate(m.created_at || m.createdAt)}</td>
                   <td className="px-6 py-4">
                     <div className="flex items-center justify-end gap-2">
                       <Link
@@ -186,13 +191,6 @@ export default function MemoriesPage() {
                         title="View Memory"
                       >
                         <Eye className="h-4 w-4" />
-                      </Link>
-                      <Link
-                        to={`/memories/${m.id}?mode=edit`}
-                        className="inline-flex items-center justify-center text-amber-500 hover:text-amber-700 hover:bg-amber-50 p-2 rounded-lg transition-colors cursor-pointer"
-                        title="Edit Memory"
-                      >
-                        <Pencil className="h-4 w-4" />
                       </Link>
                       <button
                         onClick={() => deleteMemory(m.id)}

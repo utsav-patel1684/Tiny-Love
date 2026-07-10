@@ -165,13 +165,6 @@ export default function BabiesPage() {
                       >
                         <Eye className="h-4 w-4" />
                       </Link>
-                      <Link
-                        to={`/babies/${b.id}`}
-                        className="inline-flex items-center justify-center text-amber-500 hover:text-amber-700 hover:bg-amber-50 p-2 rounded-lg transition-colors cursor-pointer"
-                        title="Edit Baby"
-                      >
-                        <Pencil className="h-4 w-4" />
-                      </Link>
                       <button
                         onClick={() => deleteBaby(b.id)}
                         className="inline-flex items-center justify-center text-red-400 hover:text-red-600 hover:bg-red-50 p-2 rounded-lg transition-colors cursor-pointer"

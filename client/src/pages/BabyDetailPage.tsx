@@ -8,7 +8,7 @@ export default function BabyDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const location = useLocation();
-  const isViewMode = location.search.includes("mode=view");
+  const isViewMode = true;
 
   const [baby, setBaby] = useState<any>(null);
   const [parentPhoto, setParentPhoto] = useState<string | null>(null);

@@ -159,95 +159,33 @@ export default function DreamTaleDetailPage() {
           </div>
         </div>
 
-        {/* Edit Form */}
-        <div className="md:col-span-2 bg-card shadow-sm rounded-xl border border-border p-6">
-          <form onSubmit={handleSave} className="space-y-4">
-            <h3 className="font-semibold text-lg border-b border-border pb-2 text-foreground mb-4">Edit Tale</h3>
-            
-            <div className="space-y-1">
-              <label className="text-sm font-medium text-foreground">Title</label>
-              <input
-                type="text"
-                name="title"
-                value={formData.title}
-                onChange={handleChange}
-                className="w-full p-2 border border-border rounded-lg bg-background text-foreground"
-              />
+        {/* Tale Details Info */}
+        <div className="md:col-span-2 bg-card shadow-sm rounded-xl border border-border p-6 space-y-4">
+          <h3 className="font-semibold text-lg border-b border-border pb-2 text-foreground mb-4">Tale Configuration</h3>
+          
+          <div>
+            <p className="text-xs text-muted-foreground">Title</p>
+            <p className="font-medium text-foreground mt-1">{dreamTale.title || "N/A"}</p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <p className="text-xs text-muted-foreground">Language</p>
+              <p className="font-medium capitalize text-foreground mt-1">{dreamTale.language || "N/A"}</p>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="space-y-1">
-                <label className="text-sm font-medium text-foreground">Language</label>
-                <select
-                  name="language"
-                  value={formData.language}
-                  onChange={handleChange}
-                  className="w-full p-2 border border-border rounded-lg bg-background text-foreground"
-                >
-                  <option value="english">English</option>
-                  <option value="hindi">Hindi</option>
-                  <option value="gujarati">Gujarati</option>
-                </select>
-              </div>
-
-              <div className="space-y-1">
-                <label className="text-sm font-medium text-foreground">Story Style</label>
-                <select
-                  name="story_style"
-                  value={formData.story_style}
-                  onChange={handleChange}
-                  className="w-full p-2 border border-border rounded-lg bg-background text-foreground"
-                >
-                  <option value="adventure">Adventure</option>
-                  <option value="lullaby">Lullaby</option>
-                  <option value="educational">Educational</option>
-                </select>
-              </div>
+            <div>
+              <p className="text-xs text-muted-foreground">Story Style</p>
+              <p className="font-medium capitalize text-foreground mt-1">{dreamTale.story_style || "N/A"}</p>
             </div>
+          </div>
 
-            <div className="space-y-1">
-              <label className="text-sm font-medium text-foreground flex justify-between">
-                Cover Image URL
-                {formData.cover_image_url && (
-                  <a href={formData.cover_image_url} target="_blank" rel="noreferrer" className="text-primary hover:underline text-xs flex items-center gap-1">
-                    View <ExternalLink className="h-3 w-3" />
-                  </a>
-                )}
-              </label>
-              <input
-                type="url"
-                name="cover_image_url"
-                value={formData.cover_image_url}
-                onChange={handleChange}
-                className="w-full p-2 border border-border rounded-lg bg-background text-foreground"
-                placeholder="https://..."
-              />
-            </div>
-
-            <div className="pt-2">
-              <label className="flex items-center gap-2 cursor-pointer text-foreground">
-                <input
-                  type="checkbox"
-                  name="is_favorite"
-                  checked={formData.is_favorite}
-                  onChange={handleChange}
-                  className="rounded border-border"
-                />
-                <span className="text-sm font-medium">Is Favorite</span>
-              </label>
-            </div>
-
-            <div className="pt-4 border-t border-border flex justify-end">
-              <button
-                type="submit"
-                disabled={saving}
-                className="bg-primary hover:bg-primary/90 text-primary-foreground px-6 py-2 rounded-lg font-medium transition-colors flex items-center gap-2"
-              >
-                {saving && <Loader2 className="w-4 h-4 animate-spin" />}
-                {saving ? "Saving..." : "Save Changes"}
-              </button>
-            </div>
-          </form>
+          <div>
+            <p className="text-xs text-muted-foreground">Favorite Status</p>
+            <span className={`inline-block mt-1 px-2.5 py-1 rounded-full text-xs font-semibold uppercase tracking-wider ${dreamTale.is_favorite ? "bg-emerald-500/10 text-emerald-500" : "bg-muted text-muted-foreground"}`}>
+              {dreamTale.is_favorite ? "Favorite" : "Standard"}
+            </span>
+          </div>
         </div>
       </div>
     </div>

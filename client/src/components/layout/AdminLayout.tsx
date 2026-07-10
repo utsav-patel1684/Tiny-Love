@@ -1,35 +1,30 @@
 import React, { useState } from "react";
 import TinyLogo from "../../../src/public/Tiny.png";
 import { Link, Outlet, useLocation } from "react-router-dom";
+import { Toaster } from "@/components/ui/toaster";
 import {
   Users,
   Baby,
   Heart,
-  MessageSquare,
-  BookOpen,
   Mail,
-  Activity,
-  AlertTriangle,
-  PanelLeftClose,
-  PanelLeft,
-  LogOut, // 1. Imported the LogOut icon here
+  BookOpen,
+  LogOut,
   ChevronLeft,
   ChevronRight,
-  Menu,
-  X,
   Loader2,
   Smile,
-  Star
+  Star,
+  Home,
+  X
 } from "lucide-react";
 
-// 2. Define the TypeScript props interface to receive onLogout from App.tsx
 interface AdminLayoutProps {
   onLogout: () => void;
 }
 
 export default function AdminLayout({ onLogout }: AdminLayoutProps) {
   const [isCollapsed, setIsCollapsed] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const location = useLocation();
   const currentPath = location.pathname;
@@ -52,8 +47,8 @@ export default function AdminLayout({ onLogout }: AdminLayoutProps) {
     }, 800);
   };
 
-  const navItems = [
-    { path: "/", label: "Dashboard", icon: Activity },
+  const sidebarNavItems = [
+    { path: "/", label: "Dashboard", icon: Home },
     { path: "/users", label: "Users", icon: Users },
     { path: "/babies", label: "Babies", icon: Baby },
     { path: "/memories", label: "Memories", icon: Heart },
@@ -63,25 +58,32 @@ export default function AdminLayout({ onLogout }: AdminLayoutProps) {
     { path: "/highlights", label: "Highlights", icon: Star },
   ];
 
+  // Instagram-style 4 main items for bottom bar
+  const bottomNavItems = [
+    { path: "/", label: "Home", icon: Home },
+    { path: "/users", label: "Users", icon: Users },
+    { path: "/babies", label: "Babies", icon: Baby },
+    { path: "/memories", label: "Memories", icon: Heart },
+  ];
+
+  // Other items mapped to the sliding drawer
+  const drawerNavItems = [
+    { path: "/invites", label: "Invites", icon: Mail },
+    { path: "/dream-tales", label: "Dream Tales", icon: BookOpen },
+    { path: "/reactions", label: "Reactions", icon: Smile },
+    { path: "/highlights", label: "Highlights", icon: Star },
+  ];
+
   return (
-    <div className="flex h-screen bg-background text-foreground font-sans relative">
-      {/* Mobile Sidebar Overlay */}
-      {isMobileMenuOpen && (
-        <div 
-          className="fixed inset-0 bg-black/60 z-40 md:hidden" 
-          onClick={() => setIsMobileMenuOpen(false)}
-        />
-      )}
+    <div className="flex h-screen bg-background text-foreground font-sans relative overflow-hidden">
       
-      {/* Sidebar */}
+      {/* Sidebar - hidden on mobile, visible on desktop */}
       <aside className={`
-        fixed inset-y-0 left-0 z-50 h-screen overflow-hidden transition-all duration-300
-        ${isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"}
-        md:relative md:translate-x-0
-        ${isCollapsed ? 'md:w-20 w-64' : 'w-64'} 
-        bg-sidebar text-sidebar-foreground flex flex-col shadow-2xl border-r border-white/20 
+        hidden md:flex flex-col h-screen overflow-hidden transition-all duration-300 shrink-0
+        ${isCollapsed ? 'w-20' : 'w-64'} 
+        bg-sidebar text-sidebar-foreground shadow-2xl border-r border-white/20
       `}>
-        <div className="flex-1 flex flex-col justify-between"> {/* Changed to justify-between to place logout button at the absolute bottom */}
+        <div className="flex-1 flex flex-col justify-between">
           <div>
             {/* Brand Header */}
             <div className={`h-20 flex items-center border-b border-white/20 transition-all duration-300 ${isCollapsed ? 'justify-center px-0' : 'px-4'}`}>
@@ -97,7 +99,7 @@ export default function AdminLayout({ onLogout }: AdminLayoutProps) {
 
             {/* Navigation Links */}
             <nav className="p-3 space-y-2">
-              {navItems.map((item) => {
+              {sidebarNavItems.map((item) => {
                 const isActive = currentPath === item.path;
                 return (
                   <Link
@@ -121,13 +123,13 @@ export default function AdminLayout({ onLogout }: AdminLayoutProps) {
             </nav>
           </div>
 
-          {/* User / Sign Out Footer */}
+          {/* Sign Out Footer */}
           <div className="p-3 border-t border-white/20">
             <button
               onClick={handleLogoutClick}
               disabled={isLoggingOut}
               title={isCollapsed ? "Sign Out" : undefined}
-              className={`w-full flex items-center h-12 ${isCollapsed ? 'justify-center px-0' : 'px-4'} text-white/75 text-base font-medium rounded-lg hover:bg-accent hover:text-white ${isLoggingOut ? 'opacity-50 cursor-not-allowed' : ''}`}
+              className={`w-full flex items-center h-12 ${isCollapsed ? 'justify-center px-0' : 'px-4'} text-white/75 text-base font-medium rounded-lg hover:bg-accent hover:text-white ${isLoggingOut ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
             >
               <div className={`flex items-center justify-center transition-all duration-200 ${isCollapsed ? 'w-full' : 'w-5'}`}>
                 {isLoggingOut ? (
@@ -141,24 +143,14 @@ export default function AdminLayout({ onLogout }: AdminLayoutProps) {
               </span>
             </button>
           </div>
-
         </div>
       </aside>
 
       {/* Main Content Area */}
-      <main className="flex-1 overflow-y-auto relative bg-background">
+      <main className="flex-1 overflow-y-auto relative bg-background pb-28 md:pb-0">
         {/* Top Header */}
         <header className="shrink-0 h-20 bg-background/70 backdrop-blur-md border-b border-white/20 px-4 md:px-8 flex items-center justify-between sticky top-0 z-30">
           <div className="flex items-center gap-4">
-            
-            {/* Mobile Menu Toggle */}
-            <button
-              onClick={() => setIsMobileMenuOpen(true)}
-              className="p-2 -ml-2 md:hidden text-foreground hover:text-primary rounded-lg hover:bg-muted/50 transition-colors cursor-pointer"
-            >
-              <Menu className="h-7 w-7" />
-            </button>
-
             {/* Desktop Collapse Toggle */}
             <button
               onClick={() => setIsCollapsed(!isCollapsed)}
@@ -182,6 +174,101 @@ export default function AdminLayout({ onLogout }: AdminLayoutProps) {
           <Outlet />
         </div>
       </main>
+
+      {/* Floating Bottom Nav Bar - visible on mobile only */}
+      <div className="fixed bottom-4 left-4 right-4 h-16 bg-[#1A1A1A]/95 backdrop-blur-md border border-white/10 rounded-full shadow-2xl z-40 flex items-center justify-around px-2 max-w-md mx-auto md:hidden">
+        {bottomNavItems.map((item) => {
+          const isActive = currentPath === item.path;
+          return (
+            <Link
+              key={item.path}
+              to={item.path}
+              className={`flex items-center justify-center w-12 h-12 rounded-full transition-all duration-200 cursor-pointer ${
+                isActive ? "bg-[#EBA545] text-white shadow-lg shadow-[#EBA545]/20" : "text-white/60 hover:text-white"
+              }`}
+            >
+              <item.icon className="h-5 w-5" />
+            </Link>
+          );
+        })}
+
+        {/* More/Menu Toggle as Profile Avatar */}
+        <button
+          onClick={() => setIsMoreMenuOpen(true)}
+          className={`flex items-center justify-center w-9 h-9 rounded-full border-2 transition-all duration-200 cursor-pointer overflow-hidden ${
+            isMoreMenuOpen ? "border-[#EBA545]" : "border-white/30 hover:border-white"
+          }`}
+        >
+          <div className="w-full h-full bg-[#EBA545]/20 flex items-center justify-center text-xs font-bold text-[#EBA545]">
+            A
+          </div>
+        </button>
+      </div>
+
+      {/* More Options Drawer Overlay */}
+      {isMoreMenuOpen && (
+        <div 
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-end justify-center md:hidden" 
+          onClick={() => setIsMoreMenuOpen(false)}
+        >
+          <div 
+            className="bg-[#1D251A] border-t border-white/10 rounded-t-3xl w-full max-w-md p-6 space-y-5 shadow-2xl animate-slideUp"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Drawer Drag Handle indicator */}
+            <div className="w-12 h-1 bg-white/20 rounded-full mx-auto mb-2" />
+            
+            <div className="flex items-center justify-between pb-2 border-b border-white/10">
+              <h3 className="text-base font-semibold text-white">More Options</h3>
+              <button 
+                onClick={() => setIsMoreMenuOpen(false)}
+                className="text-white/70 hover:text-white cursor-pointer p-1"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              {drawerNavItems.map((item) => {
+                const isActive = currentPath === item.path;
+                return (
+                  <Link
+                    key={item.path}
+                    to={item.path}
+                    onClick={() => setIsMoreMenuOpen(false)}
+                    className={`flex items-center gap-3 p-3 rounded-xl transition-all cursor-pointer ${
+                      isActive ? "bg-[#EBA545] text-white" : "bg-white/5 text-white/80 hover:bg-white/10 hover:text-white"
+                    }`}
+                  >
+                    <item.icon className="h-5 w-5" />
+                    <span className="text-sm font-medium">{item.label}</span>
+                  </Link>
+                );
+              })}
+            </div>
+
+            <div className="pt-4 border-t border-white/10">
+              <button
+                onClick={() => {
+                  setIsMoreMenuOpen(false);
+                  handleLogoutClick();
+                }}
+                disabled={isLoggingOut}
+                className="w-full flex items-center justify-center gap-2 h-12 bg-rose-500/10 hover:bg-rose-500/20 text-rose-500 rounded-xl text-sm font-semibold transition-all cursor-pointer"
+              >
+                {isLoggingOut ? (
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                ) : (
+                  <LogOut className="h-5 w-5" />
+                )}
+                <span>Sign Out</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <Toaster />
     </div>
   );
 }

@@ -8,7 +8,7 @@ export default function MemoryDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const location = useLocation();
-  const isViewMode = location.search.includes("mode=view");
+  const isViewMode = true;
 
   const MediaRenderer = ({ formData, memory }: { formData: any; memory: any }) => {
     const hasMedia = !!formData.media_url;
@@ -137,18 +137,16 @@ export default function MemoryDetailPage() {
     <div className="space-y-6 max-w-4xl animate-fadeIn">
       <div className="flex items-center justify-between">
         <div>
-          <div className="flex items-center mb-2">
+          <div className="flex items-center mb-4">
             <button
               onClick={() => navigate(-1)}
-              className="text-[14px] text-white cursor-pointer flex items-center gap-1 transition-colors"
+              className="text-[14px] bg-primary hover:bg-primary/90 text-primary-foreground px-4 py-2 rounded-lg cursor-pointer flex items-center gap-1 transition-colors font-medium shadow-sm"
             >
-              <ChevronLeft />
+              <ChevronLeft className="w-4 h-4" />
               Back
             </button>
 
-            <h1 className="text-xl mx-4 font-bold tracking-tight text-foreground">
-              Memory Details
-            </h1>
+
           </div>
           <div className="flex items-center gap-4">
           </div>

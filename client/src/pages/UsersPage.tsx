@@ -6,6 +6,19 @@ import { ConfirmDialog } from "../components/ConfirmDialog";
 import { Skeleton } from "../components/ui/skeleton";
 import { apiFetch, getServerUrl } from "../lib/api";
 import avtar from "../public/default.jpg";
+
+const getUserAvatar = (user: any) => {
+  if (!user) return avtar;
+  const img = user.profileImage || user.profile_image || user.profilePhoto || user.profile_photo || user.avatar;
+  if (!img || img === "null" || img.trim() === "") {
+    return avtar;
+  }
+  if (img.startsWith("http://") || img.startsWith("https://")) {
+    return img;
+  }
+  return `${getServerUrl()}${img.startsWith("/") ? "" : "/"}${img}`;
+};
+
 export default function UsersPage() {
 
   const [users, setUsers] = useState<any[]>([]);
@@ -131,13 +144,7 @@ export default function UsersPage() {
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
                       <img
-                        src={
-                          u.profileImage
-                            ? (u.profileImage.startsWith('http') 
-                                ? u.profileImage 
-                                : `${getServerUrl()}${u.profileImage.startsWith('/') ? '' : '/'}${u.profileImage}`)
-                            : avtar
-                        }
+                        src={getUserAvatar(u)}
                         referrerPolicy="no-referrer"
                         alt={u.name || "User avatar"}
                         className="w-10 h-10 min-w-10 min-h-10 shrink-0 rounded-full object-cover border border-white/20"
@@ -158,40 +165,33 @@ export default function UsersPage() {
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-2">
                       <div className="flex items-center gap-1.5">
-                        <span className={`h-2 w-2 rounded-full ${u.emailVerified ? "bg-emerald-500" : "bg-amber-400"}`} />
+                        <span className={`h-2 w-2 rounded-full ${(u.email_verified !== undefined ? u.email_verified : u.emailVerified) ? "bg-emerald-500" : "bg-amber-400"}`} />
                         <span className="text-xs font-medium text-white/70">
-                          {u.emailVerified ? "Verified" : "Pending "}
+                          {(u.email_verified !== undefined ? u.email_verified : u.emailVerified) ? "Verified" : "Pending "}
                         </span>
                       </div>
                       <span className="inline-block px-2 py-0.5 rounded text-[12px] font-bold  text-white">
-                        {u.authProvider}
+                        {u.auth_provider || u.authProvider}
                       </span>
                     </div>
                   </td>
                   <td className="px-6 py-4 text-xs font-medium text-white">
                     <div className="flex items-center gap-3">
-                      <span><span className="inline-block px-1.5 py-0.5 rounded text-[12px] font-bold  text-white">{u.subscriptionStatus || "free"}</span></span>
+                      <span><span className="inline-block px-1.5 py-0.5 rounded text-[12px] font-bold  text-white">{u.subscription_status || u.subscriptionStatus || "free"}</span></span>
                     </div>
                   </td>
                   <td className="px-6 py-4 text-xs text-white">
                     <div> <span className="font-semibold text-white">{u.babyCount}</span></div>
                   </td>
-                  <td className="px-6 py-4 text-xs text-white">{formatDate(u.createdAt)}</td>
+                  <td className="px-6 py-4 text-xs text-white">{formatDate(u.created_at || u.createdAt)}</td>
                   <td className="px-6 py-4">
                     <div className="flex items-center justify-end gap-2">
                       <Link
-                        to={`/users/${u.id}`}
+                        to={`/users/${u.id}?mode=view`}
                         className="inline-flex items-center justify-center text-blue-400 hover:text-blue-600 hover:bg-blue-50 p-2 rounded-lg transition-colors cursor-pointer"
                         title="View User"
                       >
                         <Eye className="h-4 w-4" />
-                      </Link>
-                      <Link
-                        to={`/users/${u.id}`}
-                        className="inline-flex items-center justify-center text-amber-500 hover:text-amber-700 hover:bg-amber-50 p-2 rounded-lg transition-colors cursor-pointer"
-                        title="Edit User"
-                      >
-                        <Pencil className="h-4 w-4" />
                       </Link>
                       <button
                         onClick={() => deleteUser(u.id)}
