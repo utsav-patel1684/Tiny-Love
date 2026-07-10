@@ -9,11 +9,13 @@ export default function Dashboard() {
   const [stats, setStats] = useState<any>(null);
   const [userGrowth, setUserGrowth] = useState<any[]>([]);
   const [memoryGrowth, setMemoryGrowth] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchOverview = async () => {
       try {
+        setLoading(true);
         const data = await apiFetch<any>("/admin/overview");
         setStats(data.counts);
         setUserGrowth(data.charts.userGrowth);
@@ -22,6 +24,8 @@ export default function Dashboard() {
       } catch (err) {
         console.error(err);
         setError("Unable to connect to the backend server.");
+      } finally {
+        setLoading(false);
       }
     };
     fetchOverview();
@@ -44,7 +48,7 @@ export default function Dashboard() {
           <div className="flex justify-between items-start">
             <div>
               <p className="text-muted-foreground text-xs font-semibold uppercase tracking-wider">Total Users</p>
-              <h3 className="text-3xl font-bold text-foreground mt-2 group-hover:text-primary transition-colors">{stats?.users ?? "-"}</h3>
+              <h3 className="text-3xl font-bold text-foreground mt-2 group-hover:text-primary transition-colors">{stats?.users ?? ""}</h3>
             </div>
             <div className="p-3 bg-primary/15 text-primary rounded-lg group-hover:bg-primary group-hover:text-primary-foreground transition-all duration-300">
               <Users className="h-6 w-6" />
@@ -56,7 +60,7 @@ export default function Dashboard() {
           <div className="flex justify-between items-start">
             <div>
               <p className="text-muted-foreground text-xs font-semibold uppercase tracking-wider">Babies Profiles</p>
-              <h3 className="text-3xl font-bold text-foreground mt-2 group-hover:text-primary transition-colors">{stats?.babies ?? "-"}</h3>
+              <h3 className="text-3xl font-bold text-foreground mt-2 group-hover:text-primary transition-colors">{stats?.babies ?? ""}</h3>
             </div>
             <div className="p-3 bg-primary/15 text-primary rounded-lg group-hover:bg-primary group-hover:text-primary-foreground transition-all duration-300">
               <Baby className="h-6 w-6" />
@@ -68,7 +72,7 @@ export default function Dashboard() {
           <div className="flex justify-between items-start">
             <div>
               <p className="text-muted-foreground text-xs font-semibold uppercase tracking-wider">Memories Shared</p>
-              <h3 className="text-3xl font-bold text-foreground mt-2 group-hover:text-primary transition-colors">{stats?.memories ?? "-"}</h3>
+              <h3 className="text-3xl font-bold text-foreground mt-2 group-hover:text-primary transition-colors">{stats?.memories ?? ""}</h3>
             </div>
             <div className="p-3 bg-primary/15 text-primary rounded-lg group-hover:bg-primary group-hover:text-primary-foreground transition-all duration-300">
               <Heart className="h-6 w-6" />
@@ -80,7 +84,7 @@ export default function Dashboard() {
           <div className="flex justify-between items-start">
             <div>
               <p className="text-muted-foreground text-xs font-semibold uppercase tracking-wider">Dream Tales</p>
-              <h3 className="text-3xl font-bold text-foreground mt-2 group-hover:text-primary transition-colors">{stats?.dreamTales ?? "-"}</h3>
+              <h3 className="text-3xl font-bold text-foreground mt-2 group-hover:text-primary transition-colors">{stats?.dreamTales ?? ""}</h3>
             </div>
             <div className="p-3 bg-primary/15 text-primary rounded-lg group-hover:bg-primary group-hover:text-primary-foreground transition-all duration-300">
               <BookOpen className="h-6 w-6" />
@@ -97,7 +101,12 @@ export default function Dashboard() {
             User Signups (Last 30 Days)
           </h4>
           <div className="h-80 w-full">
-            {userGrowth.length > 0 ? (
+            {loading ? (
+              <div className="h-full flex items-center justify-center text-white/70 text-sm gap-2">
+                {/* <Loader2 className="animate-spin text-primary w-5 h-5" /> */}
+                <span></span>
+              </div>
+            ) : userGrowth.length > 0 ? (
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={userGrowth} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
                   <defs>
@@ -146,7 +155,12 @@ export default function Dashboard() {
             Memories Shared (Last 30 Days)
           </h4>
           <div className="h-80 w-full">
-            {memoryGrowth.length > 0 ? (
+            {loading ? (
+              <div className="h-full flex items-center justify-center text-white/70 text-sm gap-2">
+
+                <span></span>
+              </div>
+            ) : memoryGrowth.length > 0 ? (
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={memoryGrowth} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
                   <defs>
