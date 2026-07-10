@@ -48,7 +48,7 @@ export default function Dashboard() {
           <div className="flex justify-between items-start">
             <div>
               <p className="text-muted-foreground text-xs font-semibold uppercase tracking-wider">Total Users</p>
-              <h3 className="text-3xl font-bold text-foreground mt-2 group-hover:text-primary transition-colors">{stats?.users ?? ""}</h3>
+              <h3 className="text-3xl font-bold text-foreground mt-2 min-h-9 group-hover:text-primary transition-colors">{stats?.users ?? ""}</h3>
             </div>
             <div className="p-3 bg-primary/15 text-primary rounded-lg group-hover:bg-primary group-hover:text-primary-foreground transition-all duration-300">
               <Users className="h-6 w-6" />
@@ -60,7 +60,7 @@ export default function Dashboard() {
           <div className="flex justify-between items-start">
             <div>
               <p className="text-muted-foreground text-xs font-semibold uppercase tracking-wider">Babies Profiles</p>
-              <h3 className="text-3xl font-bold text-foreground mt-2 group-hover:text-primary transition-colors">{stats?.babies ?? ""}</h3>
+              <h3 className="text-3xl font-bold text-foreground mt-2 min-h-9 group-hover:text-primary transition-colors">{stats?.babies ?? ""}</h3>
             </div>
             <div className="p-3 bg-primary/15 text-primary rounded-lg group-hover:bg-primary group-hover:text-primary-foreground transition-all duration-300">
               <Baby className="h-6 w-6" />
@@ -72,7 +72,7 @@ export default function Dashboard() {
           <div className="flex justify-between items-start">
             <div>
               <p className="text-muted-foreground text-xs font-semibold uppercase tracking-wider">Memories Shared</p>
-              <h3 className="text-3xl font-bold text-foreground mt-2 group-hover:text-primary transition-colors">{stats?.memories ?? ""}</h3>
+              <h3 className="text-3xl font-bold text-foreground mt-2 min-h-9 group-hover:text-primary transition-colors">{stats?.memories ?? ""}</h3>
             </div>
             <div className="p-3 bg-primary/15 text-primary rounded-lg group-hover:bg-primary group-hover:text-primary-foreground transition-all duration-300">
               <Heart className="h-6 w-6" />
@@ -84,7 +84,7 @@ export default function Dashboard() {
           <div className="flex justify-between items-start">
             <div>
               <p className="text-muted-foreground text-xs font-semibold uppercase tracking-wider">Dream Tales</p>
-              <h3 className="text-3xl font-bold text-foreground mt-2 group-hover:text-primary transition-colors">{stats?.dreamTales ?? ""}</h3>
+              <h3 className="text-3xl font-bold text-foreground mt-2 min-h-9 group-hover:text-primary transition-colors">{stats?.dreamTales ?? ""}</h3>
             </div>
             <div className="p-3 bg-primary/15 text-primary rounded-lg group-hover:bg-primary group-hover:text-primary-foreground transition-all duration-300">
               <BookOpen className="h-6 w-6" />
