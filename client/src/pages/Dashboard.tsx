@@ -43,51 +43,51 @@ export default function Dashboard() {
   return (
     <div className="space-y-8 animate-fadeIn">
       {/* Stats overview cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <div className="bg-card p-4 md:p-6 rounded-xl border border-border shadow-sm hover:shadow-md transition-all duration-300 group">
-          <div className="flex justify-between items-start">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+        <div className="bg-card p-3 md:p-6 rounded-xl border border-border shadow-sm hover:shadow-md transition-all duration-300 group">
+          <div className="flex justify-between items-start gap-1">
             <div>
-              <p className="text-muted-foreground text-xs font-semibold uppercase tracking-wider">Total Users</p>
-              <h3 className="text-3xl font-bold text-foreground mt-2 min-h-9 group-hover:text-primary transition-colors">{stats?.users ?? ""}</h3>
+              <p className="text-muted-foreground text-[10px] md:text-xs font-semibold uppercase tracking-wider">Total Users</p>
+              <h3 className="text-2xl md:text-3xl font-bold text-foreground mt-1 md:mt-2 min-h-8 md:min-h-9 group-hover:text-primary transition-colors">{stats?.users ?? ""}</h3>
             </div>
-            <div className="p-3 bg-primary/15 text-primary rounded-lg group-hover:bg-primary group-hover:text-primary-foreground transition-all duration-300">
-              <Users className="h-6 w-6" />
+            <div className="p-2.5 md:p-3 bg-primary/15 text-primary rounded-lg group-hover:bg-primary group-hover:text-primary-foreground transition-all duration-300">
+              <Users className="h-5 w-5 md:h-6 md:w-6" />
             </div>
           </div>
         </div>
 
-        <div className="bg-card p-4 md:p-6 rounded-xl border border-border shadow-sm hover:shadow-md transition-all duration-300 group">
-          <div className="flex justify-between items-start">
+        <div className="bg-card p-3 md:p-6 rounded-xl border border-border shadow-sm hover:shadow-md transition-all duration-300 group">
+          <div className="flex justify-between items-start gap-1">
             <div>
-              <p className="text-muted-foreground text-xs font-semibold uppercase tracking-wider">Babies Profiles</p>
-              <h3 className="text-3xl font-bold text-foreground mt-2 min-h-9 group-hover:text-primary transition-colors">{stats?.babies ?? ""}</h3>
+              <p className="text-muted-foreground text-[10px] md:text-xs font-semibold uppercase tracking-wider">Babies Profiles</p>
+              <h3 className="text-2xl md:text-3xl font-bold text-foreground mt-1 md:mt-2 min-h-8 md:min-h-9 group-hover:text-primary transition-colors">{stats?.babies ?? ""}</h3>
             </div>
-            <div className="p-3 bg-primary/15 text-primary rounded-lg group-hover:bg-primary group-hover:text-primary-foreground transition-all duration-300">
-              <Baby className="h-6 w-6" />
+            <div className="p-2.5 md:p-3 bg-primary/15 text-primary rounded-lg group-hover:bg-primary group-hover:text-primary-foreground transition-all duration-300">
+              <Baby className="h-5 w-5 md:h-6 md:w-6" />
             </div>
           </div>
         </div>
 
-        <div className="bg-card p-4 md:p-6 rounded-xl border border-border shadow-sm hover:shadow-md transition-all duration-300 group">
-          <div className="flex justify-between items-start">
+        <div className="bg-card p-3 md:p-6 rounded-xl border border-border shadow-sm hover:shadow-md transition-all duration-300 group">
+          <div className="flex justify-between items-start gap-1">
             <div>
-              <p className="text-muted-foreground text-xs font-semibold uppercase tracking-wider">Memories Shared</p>
-              <h3 className="text-3xl font-bold text-foreground mt-2 min-h-9 group-hover:text-primary transition-colors">{stats?.memories ?? ""}</h3>
+              <p className="text-muted-foreground text-[10px] md:text-xs font-semibold uppercase tracking-wider">Memories Shared</p>
+              <h3 className="text-2xl md:text-3xl font-bold text-foreground mt-1 md:mt-2 min-h-8 md:min-h-9 group-hover:text-primary transition-colors">{stats?.memories ?? ""}</h3>
             </div>
-            <div className="p-3 bg-primary/15 text-primary rounded-lg group-hover:bg-primary group-hover:text-primary-foreground transition-all duration-300">
-              <Heart className="h-6 w-6" />
+            <div className="p-2.5 md:p-3 bg-primary/15 text-primary rounded-lg group-hover:bg-primary group-hover:text-primary-foreground transition-all duration-300">
+              <Heart className="h-5 w-5 md:h-6 md:w-6" />
             </div>
           </div>
         </div>
 
-        <div className="bg-card p-4 md:p-6 rounded-xl border border-border shadow-sm hover:shadow-md transition-all duration-300 group">
-          <div className="flex justify-between items-start">
+        <div className="bg-card p-3 md:p-6 rounded-xl border border-border shadow-sm hover:shadow-md transition-all duration-300 group">
+          <div className="flex justify-between items-start gap-1">
             <div>
-              <p className="text-muted-foreground text-xs font-semibold uppercase tracking-wider">Dream Tales</p>
-              <h3 className="text-3xl font-bold text-foreground mt-2 min-h-9 group-hover:text-primary transition-colors">{stats?.dreamTales ?? ""}</h3>
+              <p className="text-muted-foreground text-[10px] md:text-xs font-semibold uppercase tracking-wider">Dream Tales</p>
+              <h3 className="text-2xl md:text-3xl font-bold text-foreground mt-1 md:mt-2 min-h-8 md:min-h-9 group-hover:text-primary transition-colors">{stats?.dreamTales ?? ""}</h3>
             </div>
-            <div className="p-3 bg-primary/15 text-primary rounded-lg group-hover:bg-primary group-hover:text-primary-foreground transition-all duration-300">
-              <BookOpen className="h-6 w-6" />
+            <div className="p-2.5 md:p-3 bg-primary/15 text-primary rounded-lg group-hover:bg-primary group-hover:text-primary-foreground transition-all duration-300">
+              <BookOpen className="h-5 w-5 md:h-6 md:w-6" />
             </div>
           </div>
         </div>
