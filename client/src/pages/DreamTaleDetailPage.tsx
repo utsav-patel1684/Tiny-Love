@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { apiFetch } from "../lib/api";
-import { Loader2, ExternalLink } from "lucide-react";
+import { apiFetch, getServerUrl } from "../lib/api";
+import { Loader2, ExternalLink, ChevronLeft } from "lucide-react";
+import avtar from "../public/default.jpg";
 
 export default function DreamTaleDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -11,6 +12,7 @@ export default function DreamTaleDetailPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isExpanded, setIsExpanded] = useState(false);
 
   // Form State
   const [formData, setFormData] = useState({
@@ -81,6 +83,21 @@ export default function DreamTaleDetailPage() {
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
+  const getCoverImage = (img: string) => {
+    if (!img) return avtar;
+    if (img.startsWith("http://") || img.startsWith("https://")) {
+      return img;
+    }
+    return `${getServerUrl()}${img.startsWith("/") ? "" : "/"}${img}`;
+  };
+
+  const getTruncatedStory = (text: string) => {
+    if (!text) return "";
+    const words = text.split(/\s+/);
+    if (words.length <= 50) return text;
+    return words.slice(0, 50).join(" ") + "...";
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -101,25 +118,28 @@ export default function DreamTaleDetailPage() {
     <div className="space-y-6 max-w-4xl animate-fadeIn">
       <div className="flex items-center justify-between">
         <div>
-          <button 
-            onClick={() => navigate(-1)} 
-            className="text-sm text-gray-500 hover:text-gray-900 mb-2 flex items-center gap-1 transition-colors"
-          >
-            &larr; Back
-          </button>
+          <div className="flex items-center mb-4">
+            <button
+              onClick={() => navigate(-1)}
+              className="text-[14px] bg-primary hover:bg-primary/90 text-primary-foreground px-4 py-2 rounded-lg cursor-pointer flex items-center gap-1 transition-colors font-medium shadow-sm"
+            >
+              <ChevronLeft className="w-4 h-4" />
+              Back
+            </button>
+          </div>
           <div className="flex items-center gap-4">
-            {dreamTale.cover_image_url && (
-              <img 
-                src={dreamTale.cover_image_url} 
-                alt="Cover" 
-                className="w-16 h-16 rounded object-cover shadow-sm border border-border"
-              />
-            )}
+            <img
+              src={getCoverImage(dreamTale.cover_image_url)}
+              alt="Cover"
+              className="w-16 h-16 rounded object-cover shadow-sm border border-border shrink-0"
+              onError={(e) => {
+                e.currentTarget.onerror = null;
+                e.currentTarget.src = avtar;
+              }}
+            />
             <div>
               <h1 className="text-2xl font-bold tracking-tight text-foreground">{dreamTale.title || "Dream Tale Details"}</h1>
-              <p className="text-muted-foreground text-sm">
-                ID: <span className="font-mono">{dreamTale.id}</span>
-              </p>
+
             </div>
           </div>
         </div>
@@ -129,26 +149,26 @@ export default function DreamTaleDetailPage() {
         {/* Read Only Stats Panel */}
         <div className="bg-card shadow-sm rounded-xl border border-border p-6 space-y-4 h-fit">
           <h3 className="font-semibold text-lg border-b border-border pb-2 text-foreground">Stats & Info</h3>
-          
+
           <div>
             <p className="text-xs text-muted-foreground">Voice</p>
             <p className="font-medium capitalize text-foreground">{dreamTale.voice_name || "Unknown"}</p>
           </div>
-          
+
           <div>
             <p className="text-xs text-muted-foreground">Duration</p>
             <p className="font-medium text-foreground">{formatDuration(dreamTale.duration_seconds)}</p>
           </div>
-          
+
           <div>
             <p className="text-xs text-muted-foreground">Baby Name</p>
             <p className="font-medium text-foreground">{dreamTale.babyName || "Unknown"}</p>
           </div>
-          
+
           <div>
             <p className="text-xs text-muted-foreground">Creator</p>
             <p className="font-medium text-foreground">{dreamTale.userName || "Unknown"}</p>
-            <p className="text-xs text-muted-foreground">{dreamTale.userEmail}</p>
+
           </div>
 
           <div>
@@ -162,7 +182,7 @@ export default function DreamTaleDetailPage() {
         {/* Tale Details Info */}
         <div className="md:col-span-2 bg-card shadow-sm rounded-xl border border-border p-6 space-y-4">
           <h3 className="font-semibold text-lg border-b border-border pb-2 text-foreground mb-4">Tale Configuration</h3>
-          
+
           <div>
             <p className="text-xs text-muted-foreground">Title</p>
             <p className="font-medium text-foreground mt-1">{dreamTale.title || "N/A"}</p>
@@ -186,6 +206,36 @@ export default function DreamTaleDetailPage() {
               {dreamTale.is_favorite ? "Favorite" : "Standard"}
             </span>
           </div>
+
+          {(dreamTale.audio_base64 || dreamTale.audioBase64) && (
+            <div className="pt-4 border-t border-border space-y-2">
+              <p className="text-xs text-muted-foreground">Listen to Dream Tale</p>
+              <audio 
+                controls 
+                className="w-full mt-1 accent-[#EBA545]"
+                src={`data:audio/mpeg;base64,${dreamTale.audio_base64 || dreamTale.audioBase64}`}
+              />
+            </div>
+          )}
+
+          {(dreamTale.story_text || dreamTale.storyText) && (
+            <div className="pt-6 border-t border-border space-y-2">
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-xs text-muted-foreground">Story Book</p>
+                {((dreamTale.story_text || dreamTale.storyText).split(/\s+/).length > 50) && (
+                  <button
+                    onClick={() => setIsExpanded(!isExpanded)}
+                    className="text-xs text-primary hover:underline font-semibold cursor-pointer"
+                  >
+                    {isExpanded ? "Read Less" : "Read More"}
+                  </button>
+                )}
+              </div>
+              <div className="bg-background/50 rounded-xl p-4 md:p-6 border border-border text-foreground text-sm leading-relaxed whitespace-pre-wrap font-serif">
+                {isExpanded ? (dreamTale.story_text || dreamTale.storyText) : getTruncatedStory(dreamTale.story_text || dreamTale.storyText)}
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>
