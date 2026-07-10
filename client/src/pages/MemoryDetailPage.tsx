@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { apiFetch, getServerUrl } from "../lib/api";
 import { Loader2, ExternalLink, ChevronLeft } from "lucide-react";
+import { ProtectedMedia } from "../components/ProtectedMedia";
 
 export default function MemoryDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -26,32 +27,32 @@ export default function MemoryDetailPage() {
       const type = memory?.type || "";
       const lowerUrl = mediaUrl.toLowerCase();
       const isVid = type === "video" || lowerUrl.match(/\.(mp4|webm|ogg|mov)$/i);
-      const isAud = type === "audio" || lowerUrl.match(/\.(mp3|wav|m4a)$/i);
+      const isAud = type === "voice" || type === "audio" || lowerUrl.match(/\.(mp3|wav|m4a|aac)$/i);
       const isImg = type === "photo" || type === "image" || lowerUrl.match(/\.(jpeg|jpg|gif|png|webp)$/i);
 
-      if (isVid || (!isAud && !isImg)) {
+      if (isVid) {
         return (
-          <video
+          <ProtectedMedia
+            mediaType="video"
             src={mediaUrl}
             poster={thumbUrl || undefined}
-            controls
             className="w-full max-h-96 rounded border border-border bg-black/5 object-contain"
-            preload="none"
           />
         );
       } else if (isAud) {
         return (
           <div className="space-y-4">
-            {thumbUrl && <img src={thumbUrl} alt="Thumbnail" className="w-full max-h-64 object-contain rounded border border-border bg-black/5" />}
-            <audio src={mediaUrl} controls className="w-full" preload="none" />
+            {thumbUrl && <ProtectedMedia src={thumbUrl} alt="Thumbnail" className="w-full max-h-64 object-contain rounded border border-border bg-black/5" />}
+            <ProtectedMedia mediaType="audio" src={mediaUrl} className="w-full" />
           </div>
         );
-      } else if (isImg) {
-        return <img src={mediaUrl} alt="Media" className="w-full max-h-96 object-contain rounded border border-border bg-black/5" />;
+      } else {
+        // Default to photo/image for unknown types or when isImg is true
+        return <ProtectedMedia src={mediaUrl} alt="Media" className="w-full max-h-96 object-contain rounded border border-border bg-black/5" />;
       }
     }
 
-    return <img src={thumbUrl} alt="Thumbnail" className="w-full max-h-96 object-contain rounded border border-border bg-black/5" />;
+    return <ProtectedMedia src={thumbUrl} alt="Thumbnail" className="w-full max-h-96 object-contain rounded border border-border bg-black/5" />;
   };
 
   const [memory, setMemory] = useState<any>(null);

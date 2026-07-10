@@ -159,7 +159,7 @@ export default function BabiesPage() {
                   <td className="px-6 py-4">
                     <div className="flex items-center justify-end gap-2">
                       <Link
-                        to={`/babies/${b.id}`}
+                        to={`/babies/${b.id}?mode=view`}
                         className="inline-flex items-center justify-center text-blue-400 hover:text-blue-600 hover:bg-blue-50 p-2 rounded-lg transition-colors cursor-pointer"
                         title="View Baby"
                       >
