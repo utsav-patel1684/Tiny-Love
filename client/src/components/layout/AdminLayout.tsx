@@ -149,7 +149,7 @@ export default function AdminLayout({ onLogout }: AdminLayoutProps) {
       {/* Main Content Area */}
       <main className="flex-1 overflow-y-auto relative bg-background pb-28 md:pb-0">
         {/* Top Header */}
-        <header className="shrink-0 h-20 bg-background/70 backdrop-blur-md border-b border-white/20 px-4 md:px-8 flex items-center justify-between sticky top-0 z-30">
+        <header className="hidden md:flex shrink-0 h-20 bg-background/70 backdrop-blur-md border-b border-white/20 px-4 md:px-8 items-center justify-between sticky top-0 z-30">
           <div className="flex items-center gap-4">
             {/* Desktop Collapse Toggle */}
             <button
@@ -176,7 +176,7 @@ export default function AdminLayout({ onLogout }: AdminLayoutProps) {
       </main>
 
       {/* Floating Bottom Nav Bar - visible on mobile only */}
-      <div className="fixed bottom-4 left-4 right-4 h-16 bg-[#1A1A1A]/95 backdrop-blur-md border border-white/10 rounded-full shadow-2xl z-40 flex items-center justify-around px-2 max-w-md mx-auto md:hidden">
+      <div className="fixed bottom-4 left-4 right-4 h-16 bg-[#6C7A63]/95 backdrop-blur-md border border-white/15 rounded-full shadow-2xl z-40 flex items-center justify-around px-2 max-w-md mx-auto md:hidden">
         {bottomNavItems.map((item) => {
           const isActive = currentPath === item.path;
           return (
@@ -196,10 +196,10 @@ export default function AdminLayout({ onLogout }: AdminLayoutProps) {
         <button
           onClick={() => setIsMoreMenuOpen(true)}
           className={`flex items-center justify-center w-9 h-9 rounded-full border-2 transition-all duration-200 cursor-pointer overflow-hidden ${
-            isMoreMenuOpen ? "border-[#EBA545]" : "border-white/30 hover:border-white"
+            isMoreMenuOpen ? "border-white" : "border-white/30 hover:border-white"
           }`}
         >
-          <div className="w-full h-full bg-[#EBA545]/20 flex items-center justify-center text-xs font-bold text-[#EBA545]">
+          <div className="w-full h-full bg-white/10 flex items-center justify-center text-xs font-bold text-white">
             A
           </div>
         </button>

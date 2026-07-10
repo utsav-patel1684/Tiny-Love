@@ -3,7 +3,6 @@ import { Trash2, X, Eye } from "lucide-react";
 import { Link } from "react-router-dom";
 import { PaginationControls } from "../components/ui/PaginationControls";
 import { ConfirmDialog } from "../components/ConfirmDialog";
-import { Skeleton } from "../components/ui/skeleton";
 import { apiFetch } from "../lib/api";
 
 export default function InvitesPage() {
@@ -104,10 +103,9 @@ export default function InvitesPage() {
       )}
 
       {loading ? (
-        <div className="py-10 space-y-4 w-full">
-          {[1, 2, 3, 4, 5, 6].map((i) => (
-            <Skeleton key={i} className="h-14 w-full rounded-md" />
-          ))}
+        <div className="flex flex-col items-center justify-center py-24 w-full gap-4">
+          <div className="w-10 h-10 border-4 border-white/10 border-t-[#EBA545] rounded-full animate-spin" />
+          <span className="text-white/60 text-sm font-medium tracking-wide animate-pulse">Loading invites...</span>
         </div>
       ) : (
         <div className="overflow-x-auto overflow-y-hidden w-full">
