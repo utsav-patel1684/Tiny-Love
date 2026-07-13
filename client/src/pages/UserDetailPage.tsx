@@ -3,6 +3,7 @@ import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { apiFetch, getServerUrl } from "../lib/api";
 import { Loader2, ChevronLeft, Pencil, Eye, Upload } from "lucide-react";
 import avtar from "../public/default.jpg";
+import { ImagePreview } from "../components/ImagePreview";
 import { useToast } from "@/hooks/use-toast";
 
 const getUserAvatar = (user: any) => {
@@ -219,18 +220,20 @@ export default function UserDetailPage() {
 
       <div className="max-w-4xl mx-auto">
         {isViewMode ? (
-          <div className="bg-card shadow-sm rounded-xl border border-border px-6 pb-6 pt-20 mt-16 relative flex flex-col items-center w-full max-w-lg mx-auto">
+          <div className="bg-card shadow-sm rounded-xl border border-border px-6 pb-6 pt-20 mt-16 relative flex flex-col items-center w-full max-w-2xl mx-auto">
             {/* Overlapping Photo */}
             <div className="absolute -top-16">
-              <img
-                src={getUserAvatar(user)}
-                alt={user.name}
-                className="w-32 h-32 rounded-full object-cover shadow-lg border-4 border-card bg-background"
-                onError={(e) => {
-                  e.currentTarget.onerror = null;
-                  e.currentTarget.src = avtar;
-                }}
-              />
+              <ImagePreview src={getUserAvatar(user)} alt={user.name}>
+                <img
+                  src={getUserAvatar(user)}
+                  alt={user.name}
+                  className="w-32 h-32 rounded-full object-cover shadow-lg border-4 border-card bg-background"
+                  onError={(e) => {
+                    e.currentTarget.onerror = null;
+                    e.currentTarget.src = avtar;
+                  }}
+                />
+              </ImagePreview>
             </div>
 
             {/* Title */}
@@ -249,7 +252,7 @@ export default function UserDetailPage() {
 
               <div>
                 <p className="text-xs text-muted-foreground">Email Address</p>
-                <p className="font-medium text-foreground text-base mt-1">{user.email || "N/A"}</p>
+                <p className="font-medium text-foreground text-base mt-1 break-all">{user.email || "N/A"}</p>
               </div>
 
               <div>
@@ -293,18 +296,20 @@ export default function UserDetailPage() {
             </div>
           </div>
         ) : (
-          <div className="bg-card shadow-sm rounded-xl border border-border px-6 pb-6 pt-20 mt-16 relative flex flex-col items-center w-full max-w-lg mx-auto">
+          <div className="bg-card shadow-sm rounded-xl border border-border px-6 pb-6 pt-20 mt-16 relative flex flex-col items-center w-full max-w-2xl mx-auto">
             {/* Overlapping Photo */}
             <div className="absolute -top-16">
-              <img
-                src={getUserAvatar(formData)}
-                alt={formData.name}
-                className="w-32 h-32 rounded-full object-cover shadow-lg border-4 border-card bg-background"
-                onError={(e) => {
-                  e.currentTarget.onerror = null;
-                  e.currentTarget.src = avtar;
-                }}
-              />
+              <ImagePreview src={getUserAvatar(formData)} alt={formData.name}>
+                <img
+                  src={getUserAvatar(formData)}
+                  alt={formData.name}
+                  className="w-32 h-32 rounded-full object-cover shadow-lg border-4 border-card bg-background"
+                  onError={(e) => {
+                    e.currentTarget.onerror = null;
+                    e.currentTarget.src = avtar;
+                  }}
+                />
+              </ImagePreview>
             </div>
 
             {/* Title & View Button */}

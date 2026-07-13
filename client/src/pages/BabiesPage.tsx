@@ -5,6 +5,7 @@ import { PaginationControls } from "../components/ui/PaginationControls";
 import { ConfirmDialog } from "../components/ConfirmDialog";
 import { apiFetch } from "../lib/api";
 import avtar from "../public/default.jpg";
+import { ImagePreview } from "../components/ImagePreview";
 
 export default function BabiesPage() {
 
@@ -130,15 +131,17 @@ export default function BabiesPage() {
                 <tr key={b.id} className="hover:bg-muted/70 transition-colors">
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
-                      <img
-                        src={b.profilePhoto?.trim() || avtar}
-                        alt={b.name || "Baby avatar"}
-                        className="w-10 h-10 rounded-full object-cover border border-white/20 shrink-0"
-                        onError={(e) => {
-                          e.currentTarget.onerror = null;
-                          e.currentTarget.src = avtar;
-                        }}
-                      />
+                      <ImagePreview src={b.profilePhoto?.trim() || avtar} alt={b.name || "Baby avatar"}>
+                        <img
+                          src={b.profilePhoto?.trim() || avtar}
+                          alt={b.name || "Baby avatar"}
+                          className="w-10 h-10 rounded-full object-cover border border-white/20 shrink-0"
+                          onError={(e) => {
+                            e.currentTarget.onerror = null;
+                            e.currentTarget.src = avtar;
+                          }}
+                        />
+                      </ImagePreview>
                       <div className="flex flex-col">
                         <span className="font-semibold text-white">{b.name}</span>
                       </div>

@@ -5,6 +5,7 @@ import { PaginationControls } from "../components/ui/PaginationControls";
 import { ConfirmDialog } from "../components/ConfirmDialog";
 import { apiFetch, getServerUrl } from "../lib/api";
 import { useToast } from "@/hooks/use-toast";
+import { ImagePreview } from "../components/ImagePreview";
 
 export default function MemoriesPage() {
   const { toast } = useToast();
@@ -163,7 +164,11 @@ export default function MemoriesPage() {
                             } else if (isAud) {
                               return <audio src={url} controls className="w-32 h-8" preload="none" />;
                             } else if (isImg) {
-                              return <img src={url} alt="memory preview" className="w-12 h-12 object-cover rounded border border-white/20" />;
+                               return (
+                                 <ImagePreview src={url} alt="memory preview">
+                                   <img src={url} alt="memory preview" className="w-12 h-12 object-cover rounded border border-white/20" />
+                                 </ImagePreview>
+                               );
                             } else {
                               return <video src={url} controls className="w-32 rounded bg-black/20" preload="none" />;
                             }

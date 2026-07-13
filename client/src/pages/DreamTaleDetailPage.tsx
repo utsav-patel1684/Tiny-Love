@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { apiFetch, getServerUrl } from "../lib/api";
 import { Loader2, ExternalLink, ChevronLeft } from "lucide-react";
 import avtar from "../public/default.jpg";
+import { ImagePreview } from "../components/ImagePreview";
 
 export default function DreamTaleDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -128,15 +129,17 @@ export default function DreamTaleDetailPage() {
             </button>
           </div>
           <div className="flex items-center gap-4">
-            <img
-              src={getCoverImage(dreamTale.cover_image_url)}
-              alt="Cover"
-              className="w-16 h-16 rounded object-cover shadow-sm border border-border shrink-0"
-              onError={(e) => {
-                e.currentTarget.onerror = null;
-                e.currentTarget.src = avtar;
-              }}
-            />
+            <ImagePreview src={getCoverImage(dreamTale.cover_image_url)} alt={dreamTale.title || "Cover"}>
+              <img
+                src={getCoverImage(dreamTale.cover_image_url)}
+                alt="Cover"
+                className="w-16 h-16 rounded object-cover shadow-sm border border-border shrink-0"
+                onError={(e) => {
+                  e.currentTarget.onerror = null;
+                  e.currentTarget.src = avtar;
+                }}
+              />
+            </ImagePreview>
             <div>
               <h1 className="text-2xl font-bold tracking-tight text-foreground">{dreamTale.title || "Dream Tale Details"}</h1>
 

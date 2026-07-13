@@ -5,6 +5,7 @@ import { PaginationControls } from "../components/ui/PaginationControls";
 import { ConfirmDialog } from "../components/ConfirmDialog";
 import { apiFetch, getServerUrl } from "../lib/api";
 import avtar from "../public/default.jpg";
+import { ImagePreview } from "../components/ImagePreview";
 
 const getUserAvatar = (user: any) => {
   if (!user) return avtar;
@@ -141,16 +142,18 @@ export default function UsersPage() {
                 <tr key={u.id} className="hover:bg-muted/70 transition-colors">
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
-                      <img
-                        src={getUserAvatar(u)}
-                        referrerPolicy="no-referrer"
-                        alt={u.name || "User avatar"}
-                        className="w-10 h-10 min-w-10 min-h-10 shrink-0 rounded-full object-cover border border-white/20"
-                        onError={(event) => {
-                          event.currentTarget.onerror = null;
-                          event.currentTarget.src = avtar;
-                        }}
-                      />
+                      <ImagePreview src={getUserAvatar(u)} alt={u.name || "User avatar"}>
+                        <img
+                          src={getUserAvatar(u)}
+                          referrerPolicy="no-referrer"
+                          alt={u.name || "User avatar"}
+                          className="w-10 h-10 min-w-10 min-h-10 shrink-0 rounded-full object-cover border border-white/20"
+                          onError={(event) => {
+                            event.currentTarget.onerror = null;
+                            event.currentTarget.src = avtar;
+                          }}
+                        />
+                      </ImagePreview>
 
                       <div className="flex flex-col">
                         <span className="font-semibold text-white">{u.name}</span>

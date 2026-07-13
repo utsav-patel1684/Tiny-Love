@@ -3,6 +3,7 @@ import { useParams, useNavigate, useLocation, Link } from "react-router-dom";
 import { apiFetch, getServerUrl } from "../lib/api";
 import { Loader2, ChevronLeft, ExternalLink } from "lucide-react";
 import { ProtectedMedia } from "../components/ProtectedMedia";
+import { ImagePreview } from "../components/ImagePreview";
 
 export default function BabyDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -138,11 +139,13 @@ export default function BabyDetailPage() {
               {/* Overlapping Photo */}
               <div className="absolute -top-16">
                 {baby.profile_photo ? (
-                  <img
-                    src={baby.profile_photo}
-                    alt={baby.name}
-                    className="w-32 h-32 rounded-full object-cover shadow-lg"
-                  />
+                  <ImagePreview src={baby.profile_photo} alt={baby.name}>
+                    <img
+                      src={baby.profile_photo}
+                      alt={baby.name}
+                      className="w-32 h-32 rounded-full object-cover shadow-lg"
+                    />
+                  </ImagePreview>
                 ) : (
                   <div className="w-32 h-32 rounded-full bg-muted flex items-center justify-center shadow-lg">
                     <span className="text-3xl text-muted-foreground font-bold">
@@ -168,11 +171,13 @@ export default function BabyDetailPage() {
                   <p className="text-xs text-muted-foreground mb-1">Parent Name</p>
                   <div className="flex items-center gap-3">
                     {parentPhoto ? (
-                      <img
-                        src={parentPhoto.startsWith('http') ? parentPhoto : `${getServerUrl()}${parentPhoto.startsWith('/') ? '' : '/'}${parentPhoto}`}
-                        alt="Parent"
-                        className="w-8 h-8 rounded-full object-cover shadow-sm border border-white/20"
-                      />
+                      <ImagePreview src={parentPhoto.startsWith('http') ? parentPhoto : `${getServerUrl()}${parentPhoto.startsWith('/') ? '' : '/'}${parentPhoto}`} alt="Parent">
+                        <img
+                          src={parentPhoto.startsWith('http') ? parentPhoto : `${getServerUrl()}${parentPhoto.startsWith('/') ? '' : '/'}${parentPhoto}`}
+                          alt="Parent"
+                          className="w-8 h-8 rounded-full object-cover shadow-sm border border-white/20"
+                        />
+                      </ImagePreview>
                     ) : (
                       <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center shadow-sm border border-white/20">
                         <span className="text-xs text-muted-foreground font-bold">{baby.parentName ? baby.parentName.charAt(0).toUpperCase() : "P"}</span>
@@ -253,11 +258,13 @@ export default function BabyDetailPage() {
                               />
                             </div>
                           ) : (
-                            <ProtectedMedia
-                              mediaType="photo"
-                              src={url}
-                              className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 z-10 bg-muted"
-                            />
+                            <ImagePreview src={url} alt={m.caption || "Memory photo"}>
+                              <ProtectedMedia
+                                mediaType="photo"
+                                src={url}
+                                className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 z-10 bg-muted"
+                              />
+                            </ImagePreview>
                           )
                         )}
 
@@ -281,11 +288,13 @@ export default function BabyDetailPage() {
             {/* Overlapping Photo */}
             <div className="absolute -top-16">
               {baby.profile_photo ? (
-                <img
-                  src={baby.profile_photo}
-                  alt={baby.name}
-                  className="w-32 h-32 rounded-full object-cover shadow-lg"
-                />
+                <ImagePreview src={baby.profile_photo} alt={baby.name}>
+                  <img
+                    src={baby.profile_photo}
+                    alt={baby.name}
+                    className="w-32 h-32 rounded-full object-cover shadow-lg"
+                  />
+                </ImagePreview>
               ) : (
                 <div className="w-32 h-32 rounded-full bg-muted flex items-center justify-center shadow-lg">
                   <span className="text-3xl text-muted-foreground font-bold">

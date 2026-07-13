@@ -5,6 +5,7 @@ import { PaginationControls } from "../components/ui/PaginationControls";
 import { ConfirmDialog } from "../components/ConfirmDialog";
 import { apiFetch, getServerUrl } from "../lib/api";
 import avtar from "../public/default.jpg";
+import { ImagePreview } from "../components/ImagePreview";
 
 export default function DreamTalesPage() {
 
@@ -128,15 +129,17 @@ export default function DreamTalesPage() {
                 <tr key={d.id} className="hover:bg-muted/70 transition-colors">
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-4">
-                      <img
-                        src={d.coverImageUrl ? `${getServerUrl()}${d.coverImageUrl}` : avtar}
-                        alt={d.title || "Dream Tale"}
-                        className="w-16 h-16 rounded-lg object-cover border border-border shrink-0"
-                        onError={(e) => {
-                          e.currentTarget.onerror = null;
-                          e.currentTarget.src = avtar;
-                        }}
-                      />
+                      <ImagePreview src={d.coverImageUrl ? `${getServerUrl()}${d.coverImageUrl}` : avtar} alt={d.title || "Dream Tale"}>
+                        <img
+                          src={d.coverImageUrl ? `${getServerUrl()}${d.coverImageUrl}` : avtar}
+                          alt={d.title || "Dream Tale"}
+                          className="w-16 h-16 rounded-lg object-cover border border-border shrink-0"
+                          onError={(e) => {
+                            e.currentTarget.onerror = null;
+                            e.currentTarget.src = avtar;
+                          }}
+                        />
+                      </ImagePreview>
 
                       <div className="min-w-0">
                         <div className="font-semibold text-white line-clamp-2">

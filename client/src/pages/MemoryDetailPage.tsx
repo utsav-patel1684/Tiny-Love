@@ -3,6 +3,7 @@ import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { apiFetch, getServerUrl } from "../lib/api";
 import { Loader2, ExternalLink, ChevronLeft } from "lucide-react";
 import { ProtectedMedia } from "../components/ProtectedMedia";
+import { ImagePreview } from "../components/ImagePreview";
 
 export default function MemoryDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -42,17 +43,29 @@ export default function MemoryDetailPage() {
       } else if (isAud) {
         return (
           <div className="space-y-4">
-            {thumbUrl && <ProtectedMedia src={thumbUrl} alt="Thumbnail" className="w-full max-h-64 object-contain rounded border border-border bg-black/5" />}
+            {thumbUrl && (
+              <ImagePreview src={thumbUrl} alt="Thumbnail">
+                <ProtectedMedia src={thumbUrl} alt="Thumbnail" className="w-full max-h-64 object-contain rounded border border-border bg-black/5" />
+              </ImagePreview>
+            )}
             <ProtectedMedia mediaType="audio" src={mediaUrl} className="w-full" />
           </div>
         );
       } else {
         // Default to photo/image for unknown types or when isImg is true
-        return <ProtectedMedia src={mediaUrl} alt="Media" className="w-full max-h-96 object-contain rounded border border-border bg-black/5" />;
+        return (
+          <ImagePreview src={mediaUrl} alt="Media">
+            <ProtectedMedia src={mediaUrl} alt="Media" className="w-full max-h-96 object-contain rounded border border-border bg-black/5" />
+          </ImagePreview>
+        );
       }
     }
 
-    return <ProtectedMedia src={thumbUrl} alt="Thumbnail" className="w-full max-h-96 object-contain rounded border border-border bg-black/5" />;
+    return (
+      <ImagePreview src={thumbUrl} alt="Thumbnail">
+        <ProtectedMedia src={thumbUrl} alt="Thumbnail" className="w-full max-h-96 object-contain rounded border border-border bg-black/5" />
+      </ImagePreview>
+    );
   };
 
   const [memory, setMemory] = useState<any>(null);
