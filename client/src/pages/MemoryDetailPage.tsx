@@ -4,8 +4,10 @@ import { apiFetch, getServerUrl } from "../lib/api";
 import { Loader2, ExternalLink, ChevronLeft } from "lucide-react";
 import { ProtectedMedia } from "../components/ProtectedMedia";
 import { ImagePreview } from "../components/ImagePreview";
+import { useToast } from "@/hooks/use-toast";
 
 export default function MemoryDetailPage() {
+  const { toast } = useToast();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const location = useLocation();
@@ -116,10 +118,17 @@ export default function MemoryDetailPage() {
         body: JSON.stringify(formData)
       });
       setMemory(updatedMemory);
-      alert("Memory updated successfully!");
+      toast({
+        title: "Success",
+        description: "Memory updated successfully!",
+      });
     } catch (err) {
       console.error(err);
-      alert("Failed to update memory.");
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to update memory.",
+      });
     } finally {
       setSaving(false);
     }

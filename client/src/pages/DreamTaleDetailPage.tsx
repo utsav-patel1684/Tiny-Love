@@ -4,8 +4,10 @@ import { apiFetch, getServerUrl } from "../lib/api";
 import { Loader2, ExternalLink, ChevronLeft } from "lucide-react";
 import avtar from "../public/default.jpg";
 import { ImagePreview } from "../components/ImagePreview";
+import { useToast } from "@/hooks/use-toast";
 
 export default function DreamTaleDetailPage() {
+  const { toast } = useToast();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
 
@@ -58,10 +60,17 @@ export default function DreamTaleDetailPage() {
         body: JSON.stringify(formData)
       });
       setDreamTale(updatedTale);
-      alert("Dream Tale updated successfully!");
+      toast({
+        title: "Success",
+        description: "Dream Tale updated successfully!",
+      });
     } catch (err) {
       console.error(err);
-      alert("Failed to update Dream Tale.");
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to update Dream Tale.",
+      });
     } finally {
       setSaving(false);
     }

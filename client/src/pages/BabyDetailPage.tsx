@@ -4,8 +4,10 @@ import { apiFetch, getServerUrl } from "../lib/api";
 import { Loader2, ChevronLeft, ExternalLink } from "lucide-react";
 import { ProtectedMedia } from "../components/ProtectedMedia";
 import { ImagePreview } from "../components/ImagePreview";
+import { useToast } from "@/hooks/use-toast";
 
 export default function BabyDetailPage() {
+  const { toast } = useToast();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const location = useLocation();
@@ -86,10 +88,17 @@ export default function BabyDetailPage() {
         })
       });
       setBaby(updatedBaby);
-      alert("Baby profile updated successfully!");
+      toast({
+        title: "Success",
+        description: "Baby profile updated successfully!",
+      });
     } catch (err) {
       console.error(err);
-      alert("Failed to update baby profile.");
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to update baby profile.",
+      });
     } finally {
       setSaving(false);
     }

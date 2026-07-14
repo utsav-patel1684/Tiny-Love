@@ -6,10 +6,15 @@ import { ConfirmDialog } from "../components/ConfirmDialog";
 import { apiFetch } from "../lib/api";
 import avtar from "../public/default.jpg";
 import { ImagePreview } from "../components/ImagePreview";
+import { useToast } from "@/hooks/use-toast";
 
 export default function BabiesPage() {
+  const { toast } = useToast();
 
   const [babies, setBabies] = useState<any[]>([]);
+  const [parents, setParents] = useState<any[]>([]);
+  const [selectedParentId, setSelectedParentId] = useState<string>("");
+  const [selectedMemoryRange, setSelectedMemoryRange] = useState<string>("");
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -21,17 +26,58 @@ export default function BabiesPage() {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [confirmingId, setConfirmingId] = useState<string | null>(null);
 
+  const loadParents = async () => {
+    try {
+      const data = await apiFetch<any>("/admin/users?limit=1000");
+      setParents(data.data ?? []);
+    } catch (err) {
+      console.error("Failed to load users for filter", err);
+    }
+  };
+
   const fetchBabies = async () => {
     setLoading(true);
 
     try {
-      const data = await apiFetch<any>(
-        `/admin/babies?page=${page}&limit=10`
-      );
+      const hasActiveFilter = !!(selectedParentId || selectedMemoryRange);
 
-      setBabies(data.data ?? []);
-      setTotalPages(data.totalPages ?? 1);
-      setTotalRecords(data.total ?? 0);
+      if (hasActiveFilter) {
+        const data = await apiFetch<any>("/admin/babies?limit=1000");
+        const allBabies = data.data ?? [];
+        
+        let filtered = allBabies;
+        if (selectedParentId) {
+          filtered = filtered.filter((b: any) => String(b.userId || b.user_id) === String(selectedParentId));
+        }
+
+        if (selectedMemoryRange) {
+          filtered = filtered.filter((b: any) => {
+            const count = Number(b.memoryCount || 0);
+            if (selectedMemoryRange === "1-5") {
+              return count >= 1 && count <= 5;
+            } else if (selectedMemoryRange === "6-10") {
+              return count >= 6 && count <= 10;
+            } else if (selectedMemoryRange === "11-20") {
+              return count >= 11 && count <= 20;
+            } else if (selectedMemoryRange === "20+") {
+              return count > 20;
+            }
+            return true;
+          });
+        }
+
+        setTotalRecords(filtered.length);
+        setTotalPages(Math.ceil(filtered.length / 10) || 1);
+        const startIndex = (page - 1) * 10;
+        setBabies(filtered.slice(startIndex, startIndex + 10));
+      } else {
+        const data = await apiFetch<any>(
+          `/admin/babies?page=${page}&limit=10`
+        );
+        setBabies(data.data ?? []);
+        setTotalPages(data.totalPages ?? 1);
+        setTotalRecords(data.total ?? 0);
+      }
       setError(null);
     } catch (err) {
       console.error(err);
@@ -42,8 +88,22 @@ export default function BabiesPage() {
   };
 
   useEffect(() => {
+    loadParents();
+  }, []);
+
+  useEffect(() => {
     fetchBabies();
-  }, [page]);
+  }, [page, selectedParentId, selectedMemoryRange]);
+
+  const handleParentFilterChange = (val: string) => {
+    setSelectedParentId(val);
+    setPage(1);
+  };
+
+  const handleMemoryRangeFilterChange = (val: string) => {
+    setSelectedMemoryRange(val);
+    setPage(1);
+  };
 
   const deleteBaby = (babyId: string) => {
     setConfirmingId(babyId);
@@ -56,10 +116,17 @@ export default function BabiesPage() {
       await apiFetch(`/admin/babies/${confirmingId}`, {
         method: "DELETE",
       });
-      alert("Baby profile deleted successfully.");
+      toast({
+        title: "Success",
+        description: "Baby profile deleted successfully.",
+      });
       fetchBabies();
     } catch {
-      alert("Failed to delete baby profile.");
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to delete baby profile.",
+      });
     } finally {
       setConfirmOpen(false);
       setConfirmingId(null);
@@ -106,88 +173,146 @@ export default function BabiesPage() {
       )}
 
       {/* Table Area */}
-      {loading ? (
-        <div className="flex flex-col items-center justify-center py-24 w-full gap-4">
-          <div className="w-10 h-10 border-4 border-white/10 border-t-[#EBA545] rounded-full animate-spin" />
-          <span className="text-white/60 text-sm font-medium tracking-wide animate-pulse">Loading babies...</span>
-        </div>
-      ) : (
-        <div className="overflow-x-auto overflow-y-hidden w-full">
-          <table className="w-full min-w-[800px] text-left border-collapse text-sm">
-            <thead>
-              <tr className="border-b border-border text-xs font-semibold uppercase tracking-wider">
-                <th className="px-6 py-4">Baby Details</th>
-                <th className="px-6 py-4">Birth Date</th>
-                <th className="px-6 py-4">Parent Details</th>
-                <th className="px-6 py-4">Memories count</th>
-                <th className="px-6 py-4 text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border">
-              {babies.filter(b =>
-                b.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                b.parentEmail?.toLowerCase().includes(searchQuery.toLowerCase())
-              ).map((b) => (
-                <tr key={b.id} className="hover:bg-muted/70 transition-colors">
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-3">
-                      <ImagePreview src={b.profilePhoto?.trim() || avtar} alt={b.name || "Baby avatar"}>
-                        <img
-                          src={b.profilePhoto?.trim() || avtar}
-                          alt={b.name || "Baby avatar"}
-                          className="w-10 h-10 rounded-full object-cover border border-white/20 shrink-0"
-                          onError={(e) => {
-                            e.currentTarget.onerror = null;
-                            e.currentTarget.src = avtar;
-                          }}
-                        />
-                      </ImagePreview>
-                      <div className="flex flex-col">
-                        <span className="font-semibold text-white">{b.name}</span>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 text-xs font-semibold text-white/80">
-                    {b.dob ? new Date(b.dob).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" }) : "-"}
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-2">
-                      <span className="font-medium text-white">{b.parentName || "Unknown parent"}</span>
-                      {/* <span className="text-xs text-white/70 font-mono">({b.parentEmail})</span> */}
-                    </div>
-                  </td>
-                  <td className=" py-4 font-semibold text-white/80 px-8">{b.memoryCount}</td>
-                  <td className="px-6 py-4">
-                    <div className="flex items-center justify-end gap-2">
-                      <Link
-                        to={`/babies/${b.id}?mode=view`}
-                        className="inline-flex items-center justify-center text-blue-400 hover:text-blue-600 hover:bg-blue-50 p-2 rounded-lg transition-colors cursor-pointer"
-                        title="View Baby"
-                      >
-                        <Eye className="h-4 w-4" />
-                      </Link>
+      <div className="overflow-x-auto overflow-y-hidden w-full">
+        <table className="w-full min-w-[800px] text-left border-collapse text-sm">
+          <thead>
+            <tr className="border-b border-border text-xs font-semibold uppercase tracking-wider">
+              <th className="px-6 py-4 min-w-[280px]">Baby Details</th>
+              <th className="px-6 py-4 min-w-[180px]">Birth Date</th>
+              <th className="px-6 py-4 min-w-[180px]">
+                <div className="flex flex-col gap-1.5 w-full normal-case">
+                  <span className="font-semibold uppercase tracking-wider">Parent Details</span>
+                  <div className="flex items-center gap-1 w-full">
+                    <select
+                      value={selectedParentId}
+                      onChange={(e) => handleParentFilterChange(e.target.value)}
+                      className="block w-full bg-background text-white/90 border border-border rounded px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-[#EBA545] cursor-pointer hover:border-[#EBA545]/50 transition-colors font-normal"
+                    >
+                      <option value="" className="bg-card">All Parents</option>
+                      {parents.map((p) => (
+                        <option key={p.id} value={p.id} className="bg-card">
+                          {p.name || p.email}
+                        </option>
+                      ))}
+                    </select>
+                    {selectedParentId && (
                       <button
-                        onClick={() => deleteBaby(b.id)}
-                        className="inline-flex items-center justify-center text-red-400 hover:text-red-600 hover:bg-red-50 p-2 rounded-lg transition-colors cursor-pointer"
-                        title="Delete Baby"
+                        onClick={() => handleParentFilterChange("")}
+                        className="w-5 h-5 flex items-center justify-center cursor-pointer shrink-0 transition-transform hover:scale-125"
+                        title="Reset filter"
                       >
-                        <Trash2 className="h-4 w-4" />
+                        <span className="w-2 h-2 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.7)]" />
                       </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-              {babies.length === 0 && (
-                <tr>
-                  <td colSpan={5} className="px-6 py-8 text-center text-white/70">
-                    No babies found.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      )}
+                    )}
+                  </div>
+                </div>
+              </th>
+              <th className="px-6 py-4 min-w-[160px]">
+                <div className="flex flex-col gap-1.5 w-full normal-case">
+                  <span className="font-semibold uppercase tracking-wider">Memories count</span>
+                  <div className="flex items-center gap-1 w-full">
+                    <select
+                      value={selectedMemoryRange}
+                      onChange={(e) => handleMemoryRangeFilterChange(e.target.value)}
+                      className="block w-full bg-background text-white/90 border border-border rounded px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-[#EBA545] cursor-pointer hover:border-[#EBA545]/50 transition-colors font-normal"
+                    >
+                      <option value="" className="bg-card">All Ranges</option>
+                      <option value="1-5" className="bg-card">1-5</option>
+                      <option value="6-10" className="bg-card">6-10</option>
+                      <option value="11-20" className="bg-card">11-20</option>
+                      <option value="20+" className="bg-card">20+</option>
+                    </select>
+                    {selectedMemoryRange && (
+                      <button
+                        onClick={() => handleMemoryRangeFilterChange("")}
+                        className="w-5 h-5 flex items-center justify-center cursor-pointer shrink-0 transition-transform hover:scale-125"
+                        title="Reset filter"
+                      >
+                        <span className="w-2 h-2 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.7)]" />
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </th>
+              <th className="px-6 py-4 text-right w-[100px]">Actions</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-border">
+            {loading ? (
+              <tr>
+                <td colSpan={5} className="px-6 py-24">
+                  <div className="flex flex-col items-center justify-center w-full gap-4">
+                    <div className="w-10 h-10 border-4 border-white/10 border-t-[#EBA545] rounded-full animate-spin" />
+                    <span className="text-white/60 text-sm font-medium tracking-wide animate-pulse">Loading babies...</span>
+                  </div>
+                </td>
+              </tr>
+            ) : (
+              <>
+                {babies.filter(b =>
+                  b.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                  b.parentEmail?.toLowerCase().includes(searchQuery.toLowerCase())
+                ).map((b) => (
+                  <tr key={b.id} className="hover:bg-muted/70 transition-colors">
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-3">
+                        <ImagePreview src={b.profilePhoto?.trim() || avtar} alt={b.name || "Baby avatar"}>
+                          <img
+                            src={b.profilePhoto?.trim() || avtar}
+                            alt={b.name || "Baby avatar"}
+                            className="w-10 h-10 rounded-full object-cover border border-white/20 shrink-0"
+                            onError={(e) => {
+                              e.currentTarget.onerror = null;
+                              e.currentTarget.src = avtar;
+                            }}
+                          />
+                        </ImagePreview>
+                        <div className="flex flex-col">
+                          <span className="font-semibold text-white">{b.name}</span>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 text-xs font-semibold text-white/80">
+                      {b.dob ? new Date(b.dob).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" }) : "-"}
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium text-white">{b.parentName || "Unknown parent"}</span>
+                      </div>
+                    </td>
+                    <td className=" py-4 font-semibold text-white/80 px-8">{b.memoryCount}</td>
+                    <td className="px-6 py-4">
+                      <div className="flex items-center justify-end gap-2">
+                        <Link
+                          to={`/babies/${b.id}?mode=view`}
+                          className="inline-flex items-center justify-center text-blue-400 hover:text-blue-600 hover:bg-blue-50 p-2 rounded-lg transition-colors cursor-pointer"
+                          title="View Baby"
+                        >
+                          <Eye className="h-4 w-4" />
+                        </Link>
+                        <button
+                          onClick={() => deleteBaby(b.id)}
+                          className="inline-flex items-center justify-center text-red-400 hover:text-red-600 hover:bg-red-50 p-2 rounded-lg transition-colors cursor-pointer"
+                          title="Delete Baby"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+                {babies.length === 0 && (
+                  <tr>
+                    <td colSpan={5} className="px-6 py-8 text-center text-white/70">
+                      No babies found.
+                    </td>
+                  </tr>
+                )}
+              </>
+            )}
+          </tbody>
+        </table>
+      </div>
 
       {/* Pagination Controls */}
       <PaginationControls
