@@ -21,6 +21,33 @@ const getUserAvatar = (user: any) => {
   return `${getServerUrl()}${img.startsWith("/") ? "" : "/"}${img}`;
 };
 
+const isDateInRange = (dateStr: string, range: string) => {
+  if (!range) return true;
+  if (!dateStr) return false;
+  
+  const date = new Date(dateStr);
+  const now = new Date();
+  
+  const diffTime = now.getTime() - date.getTime();
+  const diffDays = diffTime / (1000 * 60 * 60 * 24);
+  
+  if (range === "Today") {
+    return date.toDateString() === now.toDateString();
+  }
+  if (range === "Yesterday") {
+    const yesterday = new Date();
+    yesterday.setDate(now.getDate() - 1);
+    return date.toDateString() === yesterday.toDateString();
+  }
+  if (range === "Last 7 Days") {
+    return diffDays >= 0 && diffDays <= 7;
+  }
+  if (range === "Last 30 Days") {
+    return diffDays >= 0 && diffDays <= 30;
+  }
+  return true;
+};
+
 export default function UsersPage() {
   const { toast } = useToast();
 
@@ -28,6 +55,7 @@ export default function UsersPage() {
   const [selectedVerification, setSelectedVerification] = useState<string>("");
   const [selectedSubscription, setSelectedSubscription] = useState<string>("");
   const [selectedBabyRange, setSelectedBabyRange] = useState<string>("");
+  const [selectedDateFilter, setSelectedDateFilter] = useState<string>("");
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -42,53 +70,45 @@ export default function UsersPage() {
   const fetchUsers = async () => {
     setLoading(true);
     try {
-      const hasActiveFilter = !!(selectedVerification || selectedSubscription || selectedBabyRange);
+      const hasActiveFilter = !!(selectedVerification || selectedSubscription || selectedBabyRange || selectedDateFilter);
+      let url = "";
+      if (hasActiveFilter) {
+        url = "/admin/users?limit=1000";
+      } else {
+        url = `/admin/users?page=${page}&limit=10`;
+      }
+      
+      const data = await apiFetch<any>(url);
+      const fetchedUsers = data.data ?? [];
+      
+      let filtered = [...fetchedUsers];
+      if (selectedVerification) {
+        filtered = filtered.filter(u => ((u.email_verified !== undefined ? u.email_verified : u.emailVerified) ? "verified" : "pending") === selectedVerification);
+      }
+      if (selectedSubscription) {
+        filtered = filtered.filter(u => (u.subscription_status || u.subscriptionStatus || "free").toLowerCase() === selectedSubscription.toLowerCase());
+      }
+      if (selectedBabyRange) {
+        filtered = filtered.filter(u => {
+          const count = Number(u.babyCount || 0);
+          if (selectedBabyRange === "1-2") return count >= 1 && count <= 2;
+          if (selectedBabyRange === "3-5") return count >= 3 && count <= 5;
+          if (selectedBabyRange === "5+") return count > 5;
+          return true;
+        });
+      }
 
       if (hasActiveFilter) {
-        const data = await apiFetch<any>("/admin/users?limit=1000");
-        let filtered = data.data ?? [];
-
-        if (selectedVerification) {
-          filtered = filtered.filter((u: any) => {
-            const verified = u.email_verified !== undefined ? u.email_verified : u.emailVerified;
-            return selectedVerification === "verified" ? verified : !verified;
-          });
-        }
-
-        if (selectedSubscription) {
-          filtered = filtered.filter((u: any) => {
-            const sub = (u.subscription_status || u.subscriptionStatus || "free").toLowerCase();
-            return sub === selectedSubscription.toLowerCase();
-          });
-        }
-
-        if (selectedBabyRange) {
-          filtered = filtered.filter((u: any) => {
-            const count = Number(u.babyCount || 0);
-            if (selectedBabyRange === "1-2") {
-              return count >= 1 && count <= 2;
-            } else if (selectedBabyRange === "3-5") {
-              return count >= 3 && count <= 5;
-            } else if (selectedBabyRange === "5+") {
-              return count > 5;
-            }
-            return true;
-          });
-        }
-
         setTotalRecords(filtered.length);
         setTotalPages(Math.ceil(filtered.length / 10) || 1);
-
         const startIndex = (page - 1) * 10;
         setUsers(filtered.slice(startIndex, startIndex + 10));
       } else {
-        const data = await apiFetch<any>(
-          `/admin/users?page=${page}&limit=10`
-        );
-        setUsers(data.data);
-        setTotalPages(data.totalPages);
-        setTotalRecords(data.total);
+        setUsers(filtered);
+        setTotalPages(data.totalPages ?? 1);
+        setTotalRecords(data.total ?? 0);
       }
+      
       setError(null);
     } catch (err) {
       console.error(err);
@@ -100,7 +120,7 @@ export default function UsersPage() {
 
   useEffect(() => {
     fetchUsers();
-  }, [page, selectedVerification, selectedSubscription, selectedBabyRange]);
+  }, [page, selectedVerification, selectedSubscription, selectedBabyRange, selectedDateFilter]);
 
   const handleVerificationFilterChange = (val: string) => {
     setSelectedVerification(val);
@@ -187,7 +207,7 @@ export default function UsersPage() {
       {/* Table Area */}
       <div className="overflow-x-auto overflow-y-hidden w-full">
         <table className="w-full min-w-[800px] text-left text-sm whitespace-nowrap">
-          <thead>
+          <thead className="bg-background">
             <tr className="border-b border-border text-xs font-semibold uppercase tracking-wider">
               <th className="px-6 py-4 min-w-[280px]">User Details</th>
               <th className="px-6 py-4 min-w-[180px]">
@@ -260,7 +280,37 @@ export default function UsersPage() {
                   )}
                 </div>
               </th>
-              <th className="px-6 py-4 min-w-[180px]">Registered At</th>
+              <th className="px-6 py-4 min-w-[200px]">
+                <div className="flex items-center gap-1 w-full">
+                  <HeaderDropdown
+                    value={selectedDateFilter}
+                    onChange={(val) => {
+                      setSelectedDateFilter(val);
+                      setPage(1);
+                    }}
+                    placeholder="Registered At"
+                    options={[
+                      { value: "", label: "Registered At" },
+                      { value: "Today", label: "Today" },
+                      { value: "Yesterday", label: "Yesterday" },
+                      { value: "Last 7 Days", label: "Last 7 Days" },
+                      { value: "Last 30 Days", label: "Last 30 Days" },
+                    ]}
+                  />
+                  {selectedDateFilter && (
+                    <button
+                      onClick={() => {
+                        setSelectedDateFilter("");
+                        setPage(1);
+                      }}
+                      className="w-5 h-5 flex items-center justify-center cursor-pointer shrink-0 transition-transform hover:scale-125"
+                      title="Reset filter"
+                    >
+                      <span className="w-2 h-2 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.7)]" />
+                    </button>
+                  )}
+                </div>
+              </th>
               <th className="px-6 py-4 text-right w-[100px]">Actions</th>
             </tr>
           </thead>
@@ -279,6 +329,8 @@ export default function UsersPage() {
                 {users.filter(u =>
                   u.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
                   u.email?.toLowerCase().includes(searchQuery.toLowerCase())
+                ).filter(u =>
+                  isDateInRange(u.registered_at || u.created_at || u.createdAt, selectedDateFilter)
                 ).map((u) => (
                   <tr key={u.id} className="hover:bg-muted/70 transition-colors">
                     <td className="px-6 py-4">

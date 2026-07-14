@@ -56,11 +56,11 @@ export default function InviteDetailPage() {
     <div className="space-y-6 max-w-4xl animate-fadeIn">
       <div className="flex items-center justify-between">
         <div>
-          <button 
-            onClick={() => navigate(-1)} 
-            className="text-sm text-gray-500 hover:text-gray-900 mb-2 flex items-center gap-1 transition-colors"
+          <button
+            onClick={() => navigate(-1)}
+            className="inline-flex items-center gap-2 text-sm font-medium text-white/70 hover:text-white transition-colors cursor-pointer group mb-3"
           >
-            &larr; Back
+            ← Back
           </button>
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center text-primary">
@@ -68,9 +68,6 @@ export default function InviteDetailPage() {
             </div>
             <div>
               <h1 className="text-2xl font-bold tracking-tight text-foreground">Invite Details</h1>
-              <p className="text-muted-foreground text-sm">
-                ID: <span className="font-mono">{invite.id}</span>
-              </p>
             </div>
           </div>
         </div>
@@ -78,18 +75,18 @@ export default function InviteDetailPage() {
 
       <div className="bg-card shadow-sm rounded-xl border border-border p-6 max-w-2xl">
         <h3 className="font-semibold text-lg border-b border-border pb-2 text-foreground mb-4">Invite Info</h3>
-        
+
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
           <div>
             <p className="text-sm font-medium text-muted-foreground">Token</p>
             <p className="font-mono font-medium text-foreground bg-muted inline-block px-2 py-1 rounded mt-1">{invite.token || "Unknown"}</p>
           </div>
-          
+
           <div>
             <p className="text-sm font-medium text-muted-foreground">Baby Name</p>
             <p className="font-medium text-foreground mt-1">{invite.babyName || "Unknown"}</p>
           </div>
-          
+
           <div>
             <p className="text-sm font-medium text-muted-foreground">Invited Email</p>
             <p className="font-medium text-foreground mt-1">{invite.invited_email || "Unknown"}</p>
@@ -99,7 +96,7 @@ export default function InviteDetailPage() {
             <p className="text-sm font-medium text-muted-foreground">Role</p>
             <p className="font-medium text-foreground capitalize mt-1">{invite.role || "viewer"}</p>
           </div>
-          
+
           <div>
             <p className="text-sm font-medium text-muted-foreground">Can Manage Content</p>
             <p className="font-medium text-foreground mt-1">{invite.can_manage_content ? "Yes" : "No"}</p>
@@ -109,15 +106,15 @@ export default function InviteDetailPage() {
             <p className="text-sm font-medium text-muted-foreground">Created At</p>
             <p className="font-medium text-foreground mt-1">{formatDate(invite.created_at)}</p>
           </div>
-          
+
           <div>
             <p className="text-sm font-medium text-muted-foreground">Expires At</p>
             <p className="font-medium text-foreground mt-1 text-amber-600">{formatDate(invite.expires_at)}</p>
           </div>
-          
+
           <div>
             <p className="text-sm font-medium text-muted-foreground">Used At</p>
-            <p className="font-medium text-foreground mt-1 text-green-600">{formatDate(invite.used_at)}</p>
+            <p className="font-medium text-foreground mt-1text-amber-600">{formatDate(invite.used_at)}</p>
           </div>
         </div>
       </div>

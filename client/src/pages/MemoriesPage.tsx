@@ -195,7 +195,7 @@ export default function MemoriesPage() {
 
       <div className="overflow-x-auto overflow-y-hidden w-full">
         <table className="w-full min-w-[800px] text-left border-collapse text-sm">
-          <thead>
+          <thead className="bg-background">
             <tr className="border-b border-border text-xs font-semibold uppercase tracking-wider">
               <th className="px-6 py-4 min-w-[280px]">Memory Description</th>
               <th className="px-6 py-4 min-w-[150px]">
