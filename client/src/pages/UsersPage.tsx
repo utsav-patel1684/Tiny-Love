@@ -7,6 +7,7 @@ import { apiFetch, getServerUrl } from "../lib/api";
 import avtar from "../public/default.jpg";
 import { ImagePreview } from "../components/ImagePreview";
 import { useToast } from "@/hooks/use-toast";
+import { HeaderDropdown } from "../components/HeaderDropdown";
 
 const getUserAvatar = (user: any) => {
   if (!user) return avtar;
@@ -190,79 +191,73 @@ export default function UsersPage() {
             <tr className="border-b border-border text-xs font-semibold uppercase tracking-wider">
               <th className="px-6 py-4 min-w-[280px]">User Details</th>
               <th className="px-6 py-4 min-w-[180px]">
-                <div className="flex flex-col gap-1.5 w-full normal-case">
-                  <span className="font-semibold uppercase tracking-wider">Status & Provider</span>
-                  <div className="flex items-center gap-1 w-full">
-                    <select
-                      value={selectedVerification}
-                      onChange={(e) => handleVerificationFilterChange(e.target.value)}
-                      className="block w-full bg-background text-white/90 border border-border rounded px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-[#EBA545] cursor-pointer hover:border-[#EBA545]/50 transition-colors font-normal"
+                <div className="flex items-center gap-1 w-full">
+                  <HeaderDropdown
+                    value={selectedVerification}
+                    onChange={handleVerificationFilterChange}
+                    placeholder="All Statuses"
+                    options={[
+                      { value: "", label: "All Statuses" },
+                      { value: "verified", label: "Verified" },
+                      { value: "pending", label: "Pending" },
+                    ]}
+                  />
+                  {selectedVerification && (
+                    <button
+                      onClick={() => handleVerificationFilterChange("")}
+                      className="w-5 h-5 flex items-center justify-center cursor-pointer shrink-0 transition-transform hover:scale-125"
+                      title="Reset filter"
                     >
-                      <option value="" className="bg-card">All Statuses</option>
-                      <option value="verified" className="bg-card">Verified</option>
-                      <option value="pending" className="bg-card">Pending</option>
-                    </select>
-                    {selectedVerification && (
-                      <button
-                        onClick={() => handleVerificationFilterChange("")}
-                        className="w-5 h-5 flex items-center justify-center cursor-pointer shrink-0 transition-transform hover:scale-125"
-                        title="Reset filter"
-                      >
-                        <span className="w-2 h-2 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.7)]" />
-                      </button>
-                    )}
-                  </div>
+                      <span className="w-2 h-2 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.7)]" />
+                    </button>
+                  )}
                 </div>
               </th>
               <th className="px-6 py-4 min-w-[180px]">
-                <div className="flex flex-col gap-1.5 w-full normal-case">
-                  <span className="font-semibold uppercase tracking-wider">Preferences</span>
-                  <div className="flex items-center gap-1 w-full">
-                    <select
-                      value={selectedSubscription}
-                      onChange={(e) => handleSubscriptionFilterChange(e.target.value)}
-                      className="block w-full bg-background text-white/90 border border-border rounded px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-[#EBA545] cursor-pointer hover:border-[#EBA545]/50 transition-colors font-normal"
+                <div className="flex items-center gap-1 w-full">
+                  <HeaderDropdown
+                    value={selectedSubscription}
+                    onChange={handleSubscriptionFilterChange}
+                    placeholder="All Preferences"
+                    options={[
+                      { value: "", label: "All Preferences" },
+                      { value: "free", label: "Free" },
+                      { value: "premium", label: "Premium" },
+                    ]}
+                  />
+                  {selectedSubscription && (
+                    <button
+                      onClick={() => handleSubscriptionFilterChange("")}
+                      className="w-5 h-5 flex items-center justify-center cursor-pointer shrink-0 transition-transform hover:scale-125"
+                      title="Reset filter"
                     >
-                      <option value="" className="bg-card">All Preferences</option>
-                      <option value="free" className="bg-card">Free</option>
-                      <option value="premium" className="bg-card">Premium</option>
-                    </select>
-                    {selectedSubscription && (
-                      <button
-                        onClick={() => handleSubscriptionFilterChange("")}
-                        className="w-5 h-5 flex items-center justify-center cursor-pointer shrink-0 transition-transform hover:scale-125"
-                        title="Reset filter"
-                      >
-                        <span className="w-2 h-2 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.7)]" />
-                      </button>
-                    )}
-                  </div>
+                      <span className="w-2 h-2 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.7)]" />
+                    </button>
+                  )}
                 </div>
               </th>
               <th className="px-6 py-4 min-w-[160px]">
-                <div className="flex flex-col gap-1.5 w-full normal-case">
-                  <span className="font-semibold uppercase tracking-wider">Baby Owned</span>
-                  <div className="flex items-center gap-1 w-full">
-                    <select
-                      value={selectedBabyRange}
-                      onChange={(e) => handleBabyRangeFilterChange(e.target.value)}
-                      className="block w-full bg-background text-white/90 border border-border rounded px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-[#EBA545] cursor-pointer hover:border-[#EBA545]/50 transition-colors font-normal"
+                <div className="flex items-center gap-1 w-full">
+                  <HeaderDropdown
+                    value={selectedBabyRange}
+                    onChange={handleBabyRangeFilterChange}
+                    placeholder="All Ranges"
+                    options={[
+                      { value: "", label: "All Ranges" },
+                      { value: "1-2", label: "1-2" },
+                      { value: "3-5", label: "3-5" },
+                      { value: "5+", label: "5+" },
+                    ]}
+                  />
+                  {selectedBabyRange && (
+                    <button
+                      onClick={() => handleBabyRangeFilterChange("")}
+                      className="w-5 h-5 flex items-center justify-center cursor-pointer shrink-0 transition-transform hover:scale-125"
+                      title="Reset filter"
                     >
-                      <option value="" className="bg-card">All Ranges</option>
-                      <option value="1-2" className="bg-card">1-2</option>
-                      <option value="3-5" className="bg-card">3-5</option>
-                      <option value="5+" className="bg-card">5+</option>
-                    </select>
-                    {selectedBabyRange && (
-                      <button
-                        onClick={() => handleBabyRangeFilterChange("")}
-                        className="w-5 h-5 flex items-center justify-center cursor-pointer shrink-0 transition-transform hover:scale-125"
-                        title="Reset filter"
-                      >
-                        <span className="w-2 h-2 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.7)]" />
-                      </button>
-                    )}
-                  </div>
+                      <span className="w-2 h-2 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.7)]" />
+                    </button>
+                  )}
                 </div>
               </th>
               <th className="px-6 py-4 min-w-[180px]">Registered At</th>

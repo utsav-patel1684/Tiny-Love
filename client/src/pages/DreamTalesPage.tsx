@@ -7,6 +7,7 @@ import { apiFetch, getServerUrl } from "../lib/api";
 import avtar from "../public/default.jpg";
 import { ImagePreview } from "../components/ImagePreview";
 import { useToast } from "@/hooks/use-toast";
+import { HeaderDropdown } from "../components/HeaderDropdown";
 
 export default function DreamTalesPage() {
   const { toast } = useToast();
@@ -149,31 +150,25 @@ export default function DreamTalesPage() {
               <th className="px-6 py-4 min-w-[280px]">Tale Details</th>
               <th className="px-6 py-4 min-w-[250px]">Configuration</th>
               <th className="px-6 py-4 min-w-[180px]">
-                <div className="flex flex-col gap-1.5 w-full normal-case">
-                  <span className="font-semibold uppercase tracking-wider">Associated Baby</span>
-                  <div className="flex items-center gap-1 w-full">
-                    <select
-                      value={selectedBabyId}
-                      onChange={(e) => handleBabyFilterChange(e.target.value)}
-                      className="block w-full bg-background text-white/90 border border-border rounded px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-[#EBA545] cursor-pointer hover:border-[#EBA545]/50 transition-colors font-normal"
+                <div className="flex items-center gap-1 w-full">
+                  <HeaderDropdown
+                    value={selectedBabyId}
+                    onChange={handleBabyFilterChange}
+                    placeholder="All Babies"
+                    options={[
+                      { value: "", label: "All Babies" },
+                      ...babies.map((b) => ({ value: String(b.id), label: b.name })),
+                    ]}
+                  />
+                  {selectedBabyId && (
+                    <button
+                      onClick={() => handleBabyFilterChange("")}
+                      className="w-5 h-5 flex items-center justify-center cursor-pointer shrink-0 transition-transform hover:scale-125"
+                      title="Reset filter"
                     >
-                      <option value="" className="bg-card">All Babies</option>
-                      {babies.map((b) => (
-                        <option key={b.id} value={b.id} className="bg-card">
-                          {b.name}
-                        </option>
-                      ))}
-                    </select>
-                    {selectedBabyId && (
-                      <button
-                        onClick={() => handleBabyFilterChange("")}
-                        className="w-5 h-5 flex items-center justify-center cursor-pointer shrink-0 transition-transform hover:scale-125"
-                        title="Reset filter"
-                      >
-                        <span className="w-2 h-2 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.7)]" />
-                      </button>
-                    )}
-                  </div>
+                      <span className="w-2 h-2 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.7)]" />
+                    </button>
+                  )}
                 </div>
               </th>
               <th className="px-6 py-4 min-w-[180px]">Created By</th>

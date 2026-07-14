@@ -222,3 +222,21 @@
 .animate-slideUp {
   animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
+
+/* Custom scrollbar for dropdown menus */
+.dropdown-scrollbar::-webkit-scrollbar {
+  width: 5px;
+}
+
+.dropdown-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.dropdown-scrollbar::-webkit-scrollbar-thumb {
+  background: #EBA545; /* Brand Gold */
+  border-radius: 999px;
+}
+
+.dropdown-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #d48f32;
+}

@@ -7,6 +7,7 @@ import { apiFetch } from "../lib/api";
 import avtar from "../public/default.jpg";
 import { ImagePreview } from "../components/ImagePreview";
 import { useToast } from "@/hooks/use-toast";
+import { HeaderDropdown } from "../components/HeaderDropdown";
 
 export default function BabiesPage() {
   const { toast } = useToast();
@@ -180,58 +181,50 @@ export default function BabiesPage() {
               <th className="px-6 py-4 min-w-[280px]">Baby Details</th>
               <th className="px-6 py-4 min-w-[180px]">Birth Date</th>
               <th className="px-6 py-4 min-w-[180px]">
-                <div className="flex flex-col gap-1.5 w-full normal-case">
-                  <span className="font-semibold uppercase tracking-wider">Parent Details</span>
-                  <div className="flex items-center gap-1 w-full">
-                    <select
-                      value={selectedParentId}
-                      onChange={(e) => handleParentFilterChange(e.target.value)}
-                      className="block w-full bg-background text-white/90 border border-border rounded px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-[#EBA545] cursor-pointer hover:border-[#EBA545]/50 transition-colors font-normal"
+                <div className="flex items-center gap-1 w-full">
+                  <HeaderDropdown
+                    value={selectedParentId}
+                    onChange={handleParentFilterChange}
+                    placeholder="All Parents"
+                    options={[
+                      { value: "", label: "All Parents" },
+                      ...parents.map((p) => ({ value: String(p.id), label: p.name || p.email })),
+                    ]}
+                  />
+                  {selectedParentId && (
+                    <button
+                      onClick={() => handleParentFilterChange("")}
+                      className="w-5 h-5 flex items-center justify-center cursor-pointer shrink-0 transition-transform hover:scale-125"
+                      title="Reset filter"
                     >
-                      <option value="" className="bg-card">All Parents</option>
-                      {parents.map((p) => (
-                        <option key={p.id} value={p.id} className="bg-card">
-                          {p.name || p.email}
-                        </option>
-                      ))}
-                    </select>
-                    {selectedParentId && (
-                      <button
-                        onClick={() => handleParentFilterChange("")}
-                        className="w-5 h-5 flex items-center justify-center cursor-pointer shrink-0 transition-transform hover:scale-125"
-                        title="Reset filter"
-                      >
-                        <span className="w-2 h-2 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.7)]" />
-                      </button>
-                    )}
-                  </div>
+                      <span className="w-2 h-2 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.7)]" />
+                    </button>
+                  )}
                 </div>
               </th>
               <th className="px-6 py-4 min-w-[160px]">
-                <div className="flex flex-col gap-1.5 w-full normal-case">
-                  <span className="font-semibold uppercase tracking-wider">Memories count</span>
-                  <div className="flex items-center gap-1 w-full">
-                    <select
-                      value={selectedMemoryRange}
-                      onChange={(e) => handleMemoryRangeFilterChange(e.target.value)}
-                      className="block w-full bg-background text-white/90 border border-border rounded px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-[#EBA545] cursor-pointer hover:border-[#EBA545]/50 transition-colors font-normal"
+                <div className="flex items-center gap-1 w-full">
+                  <HeaderDropdown
+                    value={selectedMemoryRange}
+                    onChange={handleMemoryRangeFilterChange}
+                    placeholder="All Ranges"
+                    options={[
+                      { value: "", label: "All Ranges" },
+                      { value: "1-5", label: "1-5" },
+                      { value: "6-10", label: "6-10" },
+                      { value: "11-20", label: "11-20" },
+                      { value: "20+", label: "20+" },
+                    ]}
+                  />
+                  {selectedMemoryRange && (
+                    <button
+                      onClick={() => handleMemoryRangeFilterChange("")}
+                      className="w-5 h-5 flex items-center justify-center cursor-pointer shrink-0 transition-transform hover:scale-125"
+                      title="Reset filter"
                     >
-                      <option value="" className="bg-card">All Ranges</option>
-                      <option value="1-5" className="bg-card">1-5</option>
-                      <option value="6-10" className="bg-card">6-10</option>
-                      <option value="11-20" className="bg-card">11-20</option>
-                      <option value="20+" className="bg-card">20+</option>
-                    </select>
-                    {selectedMemoryRange && (
-                      <button
-                        onClick={() => handleMemoryRangeFilterChange("")}
-                        className="w-5 h-5 flex items-center justify-center cursor-pointer shrink-0 transition-transform hover:scale-125"
-                        title="Reset filter"
-                      >
-                        <span className="w-2 h-2 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.7)]" />
-                      </button>
-                    )}
-                  </div>
+                      <span className="w-2 h-2 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.7)]" />
+                    </button>
+                  )}
                 </div>
               </th>
               <th className="px-6 py-4 text-right w-[100px]">Actions</th>
