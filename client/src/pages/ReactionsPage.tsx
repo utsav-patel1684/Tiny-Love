@@ -9,13 +9,13 @@ import { HeaderDropdown } from "../components/HeaderDropdown";
 const isDateInRange = (dateStr: string, range: string) => {
   if (!range) return true;
   if (!dateStr) return false;
-  
+
   const date = new Date(dateStr);
   const now = new Date();
-  
+
   const diffTime = now.getTime() - date.getTime();
   const diffDays = diffTime / (1000 * 60 * 60 * 24);
-  
+
   if (range === "Today") {
     return date.toDateString() === now.toDateString();
   }
@@ -257,10 +257,10 @@ export default function ReactionsPage() {
               <>
                 {(() => {
                   const filteredList = reactions.filter(r =>
-                    (r.emoji?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                     r.memoryCaption?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                     r.userName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                     r.userEmail?.toLowerCase().includes(searchQuery.toLowerCase()))
+                  (r.emoji?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                    r.memoryCaption?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                    r.userName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                    r.userEmail?.toLowerCase().includes(searchQuery.toLowerCase()))
                   );
 
                   const seenMemoryIds = new Set<string>();
@@ -321,7 +321,7 @@ export default function ReactionsPage() {
                           <div className="flex items-center justify-end gap-2">
                             <button
                               onClick={() => handleViewDetails(r)}
-                              className="text-[#EBA545] hover:text-[#d48f32] hover:bg-white/10 p-2 rounded-lg transition-colors cursor-pointer"
+                              className="text-blue-400 hover:text-blue-600 hover:bg-blue-50 p-2 rounded-lg transition-colors cursor-pointer"
                               title="View Details"
                             >
                               <Eye className="h-4 w-4" />
@@ -405,7 +405,7 @@ export default function ReactionsPage() {
                         const thumbUrl = selectedMemory.thumbnail_url ? getFullUrl(selectedMemory.thumbnail_url) : "";
                         const type = selectedMemory.type || "";
                         const lowerUrl = mediaUrl.toLowerCase();
-                        
+
                         const isVid = type === "video" || lowerUrl.match(/\.(mp4|webm|ogg|mov)$/i);
                         const isAud = type === "voice" || type === "audio" || lowerUrl.match(/\.(mp3|wav|m4a|aac)$/i);
 

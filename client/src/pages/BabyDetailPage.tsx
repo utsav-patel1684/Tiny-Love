@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate, useLocation, Link } from "react-router-dom";
 import { apiFetch, getServerUrl } from "../lib/api";
-import { Loader2, ChevronLeft, ExternalLink } from "lucide-react";
+import { Loader2, ChevronLeft, ExternalLink, Camera, Video, Volume2, FolderHeart, Trophy } from "lucide-react";
 import { ProtectedMedia } from "../components/ProtectedMedia";
 import { ImagePreview } from "../components/ImagePreview";
 import { useToast } from "@/hooks/use-toast";
@@ -18,7 +18,38 @@ export default function BabyDetailPage() {
   const [memories, setMemories] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [activeCategory, setActiveCategory] = useState<"all" | "photo" | "video" | "voice" | "milestone">("all");
   const [error, setError] = useState<string | null>(null);
+
+  const getMemoryCategory = (m: any) => {
+    if (m.type === "milestone") return "milestone";
+    const rawUrl = m.mediaUrl || m.media_url || m.thumbnailUrl || m.thumbnail_url;
+    let url = "";
+    if (rawUrl) {
+      url = rawUrl.startsWith('http') ? rawUrl : `${getServerUrl()}${rawUrl.startsWith('/') ? '' : '/'}${rawUrl}`;
+    }
+    const isVid = m.type === "video" || (url && url.toLowerCase().match(/\.(mp4|webm|ogg|mov)$/i));
+    const isAud = m.type === "voice" || m.type === "audio" || (url && url.toLowerCase().match(/\.(mp3|wav|m4a|aac)$/i));
+    
+    if (isVid) return "video";
+    if (isAud) return "voice";
+    return "photo";
+  };
+
+  const totalCount = memories.length;
+  const photosCount = memories.filter(m => getMemoryCategory(m) === "photo").length;
+  const videosCount = memories.filter(m => getMemoryCategory(m) === "video").length;
+  const voiceCount = memories.filter(m => getMemoryCategory(m) === "voice").length;
+  const milestoneCount = memories.filter(m => getMemoryCategory(m) === "milestone").length;
+
+  const filteredMemories = memories.filter(m => {
+    const cat = getMemoryCategory(m);
+    if (activeCategory === "photo") return cat === "photo";
+    if (activeCategory === "video") return cat === "video";
+    if (activeCategory === "voice") return cat === "voice";
+    if (activeCategory === "milestone") return cat === "milestone";
+    return true;
+  });
 
   // Form State
   const [formData, setFormData] = useState({
@@ -171,13 +202,13 @@ export default function BabyDetailPage() {
 
               <div className="w-full  border-border pt-6 grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <div>
-                  <p className="text-xs text-muted-foreground">Date of Birth</p>
+                  <p className="text-xs text-foreground">Date of Birth</p>
                   <p className="font-medium text-foreground">
                     {baby.dob ? new Date(baby.dob).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" }) : "-"}
                   </p>
                 </div>
                 <div>
-                  <p className="text-xs text-muted-foreground mb-1">Parent Name</p>
+                  <p className="text-xs text-foreground mb-1">Parent Name</p>
                   <div className="flex items-center gap-3">
                     {parentPhoto ? (
                       <ImagePreview src={parentPhoto.startsWith('http') ? parentPhoto : `${getServerUrl()}${parentPhoto.startsWith('/') ? '' : '/'}${parentPhoto}`} alt="Parent">
@@ -197,13 +228,13 @@ export default function BabyDetailPage() {
                 </div>
 
                 <div>
-                  <p className="text-xs text-muted-foreground">Created At</p>
+                  <p className="text-xs text-foreground">Created At</p>
                   <p className="font-medium text-foreground">
                     {new Date(baby.created_at).toLocaleDateString()}
                   </p>
                 </div>
                 <div>
-                  <p className="text-xs text-muted-foreground">Total Memories</p>
+                  <p className="text-xs text-foreground">Total Memories</p>
                   <p className="font-medium text-foreground">{baby.memoryCount || 0}</p>
                 </div>
               </div>
@@ -211,10 +242,76 @@ export default function BabyDetailPage() {
 
             {/* Memories Section */}
             <div className="mt-8">
-              <h2 className="text-xl font-serif font-bold text-foreground mb-6">Memories ({baby.memoryCount || 0})</h2>
-              {memories.length > 0 ? (
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  {memories.map(m => {
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+                <h2 className="text-xl font-serif font-bold text-foreground">
+                  Memories ({memories.length})
+                </h2>
+
+                {/* Tabs */}
+                {memories.length > 0 && (
+                  <div className="flex flex-wrap gap-2 bg-background/50 p-1 rounded-xl border border-border">
+                    <button
+                      onClick={() => setActiveCategory("all")}
+                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                        activeCategory === "all"
+                          ? "bg-[#EBA545] text-black shadow-sm"
+                          : "text-foreground/75 hover:bg-white/5 hover:text-foreground"
+                      }`}
+                    >
+                      <FolderHeart className="w-3.5 h-3.5" />
+                      All ({totalCount})
+                    </button>
+                    <button
+                      onClick={() => setActiveCategory("photo")}
+                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                        activeCategory === "photo"
+                          ? "bg-[#EBA545] text-black shadow-sm"
+                          : "text-foreground/75 hover:bg-white/5 hover:text-foreground"
+                      }`}
+                    >
+                      <Camera className="w-3.5 h-3.5" />
+                      Photo ({photosCount})
+                    </button>
+                    <button
+                      onClick={() => setActiveCategory("video")}
+                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                        activeCategory === "video"
+                          ? "bg-[#EBA545] text-black shadow-sm"
+                          : "text-foreground/75 hover:bg-white/5 hover:text-foreground"
+                      }`}
+                    >
+                      <Video className="w-3.5 h-3.5" />
+                      Video ({videosCount})
+                    </button>
+                    <button
+                      onClick={() => setActiveCategory("voice")}
+                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                        activeCategory === "voice"
+                          ? "bg-[#EBA545] text-black shadow-sm"
+                          : "text-foreground/75 hover:bg-white/5 hover:text-foreground"
+                      }`}
+                    >
+                      <Volume2 className="w-3.5 h-3.5" />
+                      Voice ({voiceCount})
+                    </button>
+                    <button
+                      onClick={() => setActiveCategory("milestone")}
+                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                        activeCategory === "milestone"
+                          ? "bg-[#EBA545] text-black shadow-sm"
+                          : "text-foreground/75 hover:bg-white/5 hover:text-foreground"
+                      }`}
+                    >
+                      <Trophy className="w-3.5 h-3.5" />
+                      Milestone ({milestoneCount})
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              {filteredMemories.length > 0 ? (
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
+                  {filteredMemories.map(m => {
                     const rawUrl = m.mediaUrl || m.media_url || m.thumbnailUrl || m.thumbnail_url;
                     let url = "";
                     if (rawUrl) {
@@ -287,7 +384,7 @@ export default function BabyDetailPage() {
                 </div>
               ) : (
                 <div className="bg-card border border-border rounded-xl p-8 text-center">
-                  <p className="text-muted-foreground text-sm">No memories found for this baby yet.</p>
+                  <p className="text-muted-foreground text-sm">No memories found in this category.</p>
                 </div>
               )}
             </div>

@@ -86,7 +86,7 @@ export default function AdminLayout({ onLogout }: AdminLayoutProps) {
         <div className="flex-1 flex flex-col justify-between">
           <div>
             {/* Brand Header */}
-            <div className={`h-20 flex items-center border-b border-white/20 transition-all duration-300 ${isCollapsed ? 'justify-center px-0' : 'px-4'}`}>
+            <div className={`h-16 flex items-center border-b border-white/20 transition-all duration-300 ${isCollapsed ? 'justify-center px-0' : 'px-4'}`}>
               <div className={`flex items-center transition-all duration-300 ${isCollapsed ? '' : 'gap-3'}`}>
                 <div className="h-10 w-10 rounded-xl overflow-hidden bg-[#EBA545] shadow-md flex-shrink-0">
                   <img src={TinyLogo} alt="Tiny Love logo" className="h-full w-full object-cover" />
@@ -149,7 +149,7 @@ export default function AdminLayout({ onLogout }: AdminLayoutProps) {
       {/* Main Content Area */}
       <main className="flex-1 overflow-y-auto relative bg-background pb-28 md:pb-0">
         {/* Top Header */}
-        <header className="hidden md:flex shrink-0 h-20 bg-background/70 backdrop-blur-md border-b border-white/20 px-4 md:px-8 items-center justify-between sticky top-0 z-30">
+        <header className="hidden md:flex shrink-0 h-16 bg-background/70 backdrop-blur-md border-b border-white/20 px-4 md:px-8 items-center justify-between sticky top-0 z-30">
           <div className="flex items-center gap-4">
             {/* Desktop Collapse Toggle */}
             <button
@@ -170,7 +170,7 @@ export default function AdminLayout({ onLogout }: AdminLayoutProps) {
         </header>
 
         {/* Page Content Outlet */}
-        <div className="p-4 md:p-8 max-w-7xl w-full mx-auto space-y-6 md:space-y-8 min-h-[calc(100vh-5rem)]">
+        <div className="p-4 md:p-8 max-w-7xl w-full mx-auto space-y-6 md:space-y-8 min-h-[calc(100vh-4rem)]">
           <Outlet />
         </div>
       </main>

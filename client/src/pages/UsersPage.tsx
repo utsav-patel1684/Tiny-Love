@@ -24,13 +24,13 @@ const getUserAvatar = (user: any) => {
 const isDateInRange = (dateStr: string, range: string) => {
   if (!range) return true;
   if (!dateStr) return false;
-  
+
   const date = new Date(dateStr);
   const now = new Date();
-  
+
   const diffTime = now.getTime() - date.getTime();
   const diffDays = diffTime / (1000 * 60 * 60 * 24);
-  
+
   if (range === "Today") {
     return date.toDateString() === now.toDateString();
   }
@@ -77,10 +77,10 @@ export default function UsersPage() {
       } else {
         url = `/admin/users?page=${page}&limit=10`;
       }
-      
+
       const data = await apiFetch<any>(url);
       const fetchedUsers = data.data ?? [];
-      
+
       let filtered = [...fetchedUsers];
       if (selectedVerification) {
         filtered = filtered.filter(u => ((u.email_verified !== undefined ? u.email_verified : u.emailVerified) ? "verified" : "pending") === selectedVerification);
@@ -108,7 +108,7 @@ export default function UsersPage() {
         setTotalPages(data.totalPages ?? 1);
         setTotalRecords(data.total ?? 0);
       }
-      
+
       setError(null);
     } catch (err) {
       console.error(err);
@@ -261,9 +261,9 @@ export default function UsersPage() {
                   <HeaderDropdown
                     value={selectedBabyRange}
                     onChange={handleBabyRangeFilterChange}
-                    placeholder="All Ranges"
+                    placeholder=" Baby Count"
                     options={[
-                      { value: "", label: "All Ranges" },
+                      { value: "", label: "All Count" },
                       { value: "1-2", label: "1-2" },
                       { value: "3-5", label: "3-5" },
                       { value: "5+", label: "5+" },

@@ -217,9 +217,9 @@ export default function DreamTalesPage() {
                       setSelectedDateFilter(val);
                       setPage(1);
                     }}
-                    placeholder="Generated At"
+                    placeholder="Created At"
                     options={[
-                      { value: "", label: "Generated At" },
+                      { value: "", label: "Created At" },
                       { value: "Today", label: "Today" },
                       { value: "Yesterday", label: "Yesterday" },
                       { value: "Last 7 Days", label: "Last 7 Days" },
@@ -257,7 +257,8 @@ export default function DreamTalesPage() {
               <>
                 {dreamTales.filter(d =>
                   d.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                  d.userName?.toLowerCase().includes(searchQuery.toLowerCase())
+                  d.userName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                  d.babyName?.toLowerCase().includes(searchQuery.toLowerCase())
                 ).filter(d =>
                   isDateInRange(d.created_at || d.createdAt, selectedDateFilter)
                 ).map((d) => (
@@ -314,14 +315,14 @@ export default function DreamTalesPage() {
                       <div className="flex items-center justify-end gap-1">
                         <Link
                           to={`/dream-tales/${d.id}`}
-                          className="inline-flex items-center justify-center text-white hover:text-[#EBA545] hover:bg-white/10 p-2 rounded-lg transition-colors cursor-pointer"
+                          className="inline-flex items-center justify-center text-blue-400 hover:text-blue-600 hover:bg-blue-50 p-2 rounded-lg transition-colors cursor-pointer"
                           title="View Dream Tale"
                         >
                           <Eye className="h-4 w-4" />
                         </Link>
                         <button
                           onClick={() => deleteDreamTale(d.id)}
-                          className="inline-flex items-center justify-center text-red-400 hover:text-red-500 hover:bg-red-500/10 p-2 rounded-lg transition-colors cursor-pointer"
+                          className="inline-flex items-center justify-center text-red-400 hover:text-red-500 hover:bg-red-50 p-2 rounded-lg transition-colors cursor-pointer"
                           title="Delete Dream Tale"
                         >
                           <Trash2 className="h-4 w-4" />

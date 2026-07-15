@@ -45,17 +45,17 @@ export default function MemoriesPage() {
         // Fetch all memories to filter client-side (since the backend does not support filtering natively on this route)
         const data = await apiFetch<any>("/admin/memories?limit=1000");
         let filtered = data.data ?? [];
-        
+
         // Filter memories for the selected baby
         if (selectedBabyId) {
-          filtered = filtered.filter((m: any) => 
+          filtered = filtered.filter((m: any) =>
             String(m.babyId || m.baby_id) === String(selectedBabyId)
           );
         }
 
         // Filter memories for the selected type
         if (selectedType) {
-          filtered = filtered.filter((m: any) => 
+          filtered = filtered.filter((m: any) =>
             String(m.type).toLowerCase() === selectedType.toLowerCase()
           );
         }
@@ -64,13 +64,13 @@ export default function MemoriesPage() {
         if (selectedDateRange) {
           const now = new Date();
           let cutoffDate: Date | null = null;
-          
+
           if (selectedDateRange === "week") {
             cutoffDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
           } else if (selectedDateRange === "month") {
             cutoffDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
           }
-          
+
           if (cutoffDate) {
             filtered = filtered.filter((m: any) => {
               const createdStr = m.created_at || m.createdAt;
@@ -251,9 +251,9 @@ export default function MemoriesPage() {
                   <HeaderDropdown
                     value={selectedDateRange}
                     onChange={handleDateRangeFilterChange}
-                    placeholder="All Time"
+                    placeholder="Created At"
                     options={[
-                      { value: "", label: "All Time" },
+                      { value: "", label: "Created At " },
                       { value: "week", label: "Last Week" },
                       { value: "month", label: "Last Month" },
                     ]}
@@ -286,7 +286,9 @@ export default function MemoriesPage() {
               <>
                 {memories.filter(m =>
                   m.caption?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                  m.uploaderEmail?.toLowerCase().includes(searchQuery.toLowerCase())
+                  m.uploaderEmail?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                  m.uploaderName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                  m.babyName?.toLowerCase().includes(searchQuery.toLowerCase())
                 ).map((m) => (
                   <tr key={m.id} className="hover:bg-muted/70 transition-colors">
                     <td className="px-6 py-4 max-w-xs">
@@ -319,11 +321,11 @@ export default function MemoriesPage() {
                               } else if (isAud) {
                                 return <audio src={url} controls className="w-32 h-8" preload="none" />;
                               } else if (isImg) {
-                                 return (
-                                   <ImagePreview src={url} alt="memory preview">
-                                     <img src={url} alt="memory preview" className="w-12 h-12 object-cover rounded border border-white/20" />
-                                   </ImagePreview>
-                                 );
+                                return (
+                                  <ImagePreview src={url} alt="memory preview">
+                                    <img src={url} alt="memory preview" className="w-12 h-12 object-cover rounded border border-white/20" />
+                                  </ImagePreview>
+                                );
                               } else {
                                 return <video src={url} controls className="w-32 rounded bg-black/20" preload="none" />;
                               }

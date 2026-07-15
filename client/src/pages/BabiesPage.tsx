@@ -3,7 +3,7 @@ import { Trash2, X, Eye, Pencil } from "lucide-react";
 import { Link } from "react-router-dom";
 import { PaginationControls } from "../components/ui/PaginationControls";
 import { ConfirmDialog } from "../components/ConfirmDialog";
-import { apiFetch } from "../lib/api";
+import { apiFetch, getServerUrl } from "../lib/api";
 import avtar from "../public/default.jpg";
 import { ImagePreview } from "../components/ImagePreview";
 import { useToast } from "@/hooks/use-toast";
@@ -11,6 +11,15 @@ import { HeaderDropdown } from "../components/HeaderDropdown";
 
 export default function BabiesPage() {
   const { toast } = useToast();
+
+  const getFullUrl = (rawUrl: string) => {
+    if (!rawUrl || !rawUrl.trim()) return avtar;
+    const trimmed = rawUrl.trim();
+    if (trimmed.startsWith("http") || trimmed.startsWith("data:")) {
+      return trimmed;
+    }
+    return `${getServerUrl()}${trimmed.startsWith("/") ? "" : "/"}${trimmed}`;
+  };
 
   const [babies, setBabies] = useState<any[]>([]);
   const [parents, setParents] = useState<any[]>([]);
@@ -45,10 +54,13 @@ export default function BabiesPage() {
       if (hasActiveFilter) {
         const data = await apiFetch<any>("/admin/babies?limit=1000");
         const allBabies = data.data ?? [];
-        
+
         let filtered = allBabies;
         if (selectedParentId) {
-          filtered = filtered.filter((b: any) => String(b.userId || b.user_id) === String(selectedParentId));
+          filtered = filtered.filter((b: any) => {
+            const parentName = (b.parentName || "").toLowerCase();
+            return parentName === selectedParentId.toLowerCase();
+          });
         }
 
         if (selectedMemoryRange) {
@@ -188,7 +200,7 @@ export default function BabiesPage() {
                     placeholder="All Parents"
                     options={[
                       { value: "", label: "All Parents" },
-                      ...parents.map((p) => ({ value: String(p.id), label: p.name || p.email })),
+                      ...parents.map((p) => ({ value: p.name || p.email, label: p.name || p.email })),
                     ]}
                   />
                   {selectedParentId && (
@@ -207,9 +219,9 @@ export default function BabiesPage() {
                   <HeaderDropdown
                     value={selectedMemoryRange}
                     onChange={handleMemoryRangeFilterChange}
-                    placeholder="All Ranges"
+                    placeholder="Memory-count"
                     options={[
-                      { value: "", label: "All Ranges" },
+                      { value: "", label: "All Count" },
                       { value: "1-5", label: "1-5" },
                       { value: "6-10", label: "6-10" },
                       { value: "11-20", label: "11-20" },
@@ -249,9 +261,9 @@ export default function BabiesPage() {
                   <tr key={b.id} className="hover:bg-muted/70 transition-colors">
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
-                        <ImagePreview src={b.profilePhoto?.trim() || avtar} alt={b.name || "Baby avatar"}>
+                        <ImagePreview src={getFullUrl(b.profile_photo || b.profilePhoto)} alt={b.name || "Baby avatar"}>
                           <img
-                            src={b.profilePhoto?.trim() || avtar}
+                            src={getFullUrl(b.profile_photo || b.profilePhoto)}
                             alt={b.name || "Baby avatar"}
                             className="w-10 h-10 rounded-full object-cover border border-white/20 shrink-0"
                             onError={(e) => {
@@ -265,7 +277,7 @@ export default function BabiesPage() {
                         </div>
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-xs font-semibold text-white/80">
+                    <td className="px-6 py-4 text-xs font-semibold text-white">
                       {b.dob ? new Date(b.dob).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" }) : "-"}
                     </td>
                     <td className="px-6 py-4">
