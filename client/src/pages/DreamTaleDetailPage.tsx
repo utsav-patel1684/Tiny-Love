@@ -169,10 +169,10 @@ export default function DreamTaleDetailPage() {
       {/* Back Button */}
       <button
         onClick={() => navigate(-1)}
-        className="inline-flex items-center gap-2 text-sm font-medium text-white/70 hover:text-white transition-colors cursor-pointer group"
+        className="inline-flex items-center gap-2 text-sm font-medium bg-[#EBA545] hover:bg-[#d9973f] text-white px-5 py-2 rounded-full cursor-pointer transition-colors shadow-sm"
       >
-        <ChevronLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
-        Back to Dream Tales
+        <ChevronLeft className="w-4 h-4" />
+        Back
       </button>
 
       {/* Hero Card */}

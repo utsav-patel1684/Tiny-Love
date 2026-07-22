@@ -84,10 +84,30 @@ export function ProtectedMedia({ src, mediaType = 'photo', ...props }: Protected
 
   useEffect(() => {
     activeRef.current = true;
+    setError(null);
+    setObjectUrl(null);
+    if (localBlobUrlRef.current) {
+      URL.revokeObjectURL(localBlobUrlRef.current);
+      localBlobUrlRef.current = null;
+    }
     if (!src) return;
 
     // If it's an external URL (not our server), just use it
     if (src.startsWith('http') && !src.includes(getServerUrl())) {
+      setObjectUrl(src);
+      return;
+    }
+
+    // Bypass fetching for non-HEIC files (videos, audios, and standard images).
+    // This avoids timeouts on browser concurrent requests limits and saves massive bandwidth.
+    const cleanSrc = src.split(/[?#]/)[0];
+    const isPotentialHEIC = mediaType === 'photo' && (
+      cleanSrc.toLowerCase().endsWith('.heic') ||
+      cleanSrc.toLowerCase().endsWith('.heif') ||
+      !cleanSrc.split('/').pop()?.includes('.')
+    );
+
+    if (!isPotentialHEIC) {
       setObjectUrl(src);
       return;
     }
@@ -148,10 +168,13 @@ export function ProtectedMedia({ src, mediaType = 'photo', ...props }: Protected
         }
       } catch (e: any) {
         mediaCache.delete(src);
-        console.error("Media load error", e);
+        // Suppress expected 404s from cluttering the console, as we handle fallbacks natively
+        if (!e.message?.includes('404')) {
+          console.warn("ProtectedMedia load fallback triggered:", e.message || e);
+        }
         if (activeRef.current) {
-          setError(e.message || String(e));
           // Fallback to original src if fetch fails (e.g. CORS or already public)
+          // Do not set error state, so that the fallback image can render.
           setObjectUrl(src);
         }
       }
@@ -170,8 +193,9 @@ export function ProtectedMedia({ src, mediaType = 'photo', ...props }: Protected
 
   if (error) {
     return (
-      <div className={`p-4 border border-rose-200 bg-rose-50 text-rose-600 rounded text-xs ${props.className || ''}`}>
-        Media Error: {error}
+      <div className={`p-4 border border-rose-200 bg-rose-50 text-rose-600 rounded text-xs flex flex-col items-center justify-center text-center ${props.className || ''}`}>
+        <span className="font-semibold text-rose-700 mb-1">Media Error</span>
+        <span>{error}</span>
       </div>
     );
   }
@@ -193,5 +217,11 @@ export function ProtectedMedia({ src, mediaType = 'photo', ...props }: Protected
     return <audio src={objectUrl} controls {...(props as any)} />;
   }
 
-  return <img src={objectUrl} {...props} />;
+  return (
+    <img 
+      src={objectUrl} 
+      onError={() => setError("Image not found")} 
+      {...props} 
+    />
+  );
 }

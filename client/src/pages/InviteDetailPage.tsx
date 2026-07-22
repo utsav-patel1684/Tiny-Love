@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { apiFetch } from "../lib/api";
-import { Loader2, Mail } from "lucide-react";
+import { Loader2, Mail, ChevronLeft } from "lucide-react";
 
 export default function InviteDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -58,9 +58,10 @@ export default function InviteDetailPage() {
         <div>
           <button
             onClick={() => navigate(-1)}
-            className="inline-flex items-center gap-2 text-sm font-medium text-white/70 hover:text-white transition-colors cursor-pointer group mb-3"
+            className="inline-flex items-center gap-2 text-sm font-medium bg-[#EBA545] hover:bg-[#d9973f] text-white px-5 py-2 rounded-full cursor-pointer transition-colors shadow-sm mb-3"
           >
-            ← Back
+            <ChevronLeft className="w-4 h-4" />
+            Back
           </button>
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center text-primary">

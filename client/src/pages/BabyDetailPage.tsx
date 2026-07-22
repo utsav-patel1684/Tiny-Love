@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate, useLocation, Link } from "react-router-dom";
 import { apiFetch, getServerUrl } from "../lib/api";
-import { Loader2, ChevronLeft, ExternalLink, Camera, Video, Volume2, FolderHeart, Trophy } from "lucide-react";
+import { Loader2, ChevronLeft, ExternalLink, Camera, Video, Volume2, FolderHeart, Trophy, Images } from "lucide-react";
 import { ProtectedMedia } from "../components/ProtectedMedia";
 import { ImagePreview } from "../components/ImagePreview";
 import { useToast } from "@/hooks/use-toast";
@@ -20,6 +20,7 @@ export default function BabyDetailPage() {
   const [saving, setSaving] = useState(false);
   const [activeCategory, setActiveCategory] = useState<"all" | "photo" | "video" | "voice" | "milestone">("all");
   const [error, setError] = useState<string | null>(null);
+  const [profileImageError, setProfileImageError] = useState(false);
 
   const getMemoryCategory = (m: any) => {
     if (m.type === "milestone") return "milestone";
@@ -30,10 +31,19 @@ export default function BabyDetailPage() {
     }
     const isVid = m.type === "video" || (url && url.toLowerCase().match(/\.(mp4|webm|ogg|mov)$/i));
     const isAud = m.type === "voice" || m.type === "audio" || (url && url.toLowerCase().match(/\.(mp3|wav|m4a|aac)$/i));
-    
+
     if (isVid) return "video";
     if (isAud) return "voice";
     return "photo";
+  };
+
+  const getFullUrl = (path: string | undefined | null) => {
+    if (!path) return "";
+    let cleanPath = path;
+    if (typeof cleanPath === 'string' && cleanPath.includes(',')) {
+      cleanPath = cleanPath.split(',')[0].trim();
+    }
+    return cleanPath.startsWith('http') ? cleanPath : `${getServerUrl()}${cleanPath.startsWith('/') ? '' : '/'}${cleanPath}`;
   };
 
   const totalCount = memories.length;
@@ -178,16 +188,17 @@ export default function BabyDetailPage() {
             <div className="bg-card shadow-sm rounded-xl border border-border px-6 pb-6 pt-20 mt-16 relative flex flex-col items-center w-full max-w-lg mx-auto">
               {/* Overlapping Photo */}
               <div className="absolute -top-16">
-                {baby.profile_photo ? (
-                  <ImagePreview src={baby.profile_photo} alt={baby.name}>
+                {baby.profile_photo && !profileImageError ? (
+                  <ImagePreview src={getFullUrl(baby.profile_photo)} alt={baby.name}>
                     <img
-                      src={baby.profile_photo}
+                      src={getFullUrl(baby.profile_photo)}
                       alt={baby.name}
-                      className="w-32 h-32 rounded-full object-cover shadow-lg"
+                      className="w-32 h-32 rounded-full object-cover shadow-lg bg-background"
+                      onError={() => setProfileImageError(true)}
                     />
                   </ImagePreview>
                 ) : (
-                  <div className="w-32 h-32 rounded-full bg-muted flex items-center justify-center shadow-lg">
+                  <div className="w-32 h-32 rounded-full bg-muted flex items-center justify-center shadow-lg border-4 border-background">
                     <span className="text-3xl text-muted-foreground font-bold">
                       {baby.name ? baby.name.charAt(0).toUpperCase() : "B"}
                     </span>
@@ -210,19 +221,8 @@ export default function BabyDetailPage() {
                 <div>
                   <p className="text-xs text-foreground mb-1">Parent Name</p>
                   <div className="flex items-center gap-3">
-                    {parentPhoto ? (
-                      <ImagePreview src={parentPhoto.startsWith('http') ? parentPhoto : `${getServerUrl()}${parentPhoto.startsWith('/') ? '' : '/'}${parentPhoto}`} alt="Parent">
-                        <img
-                          src={parentPhoto.startsWith('http') ? parentPhoto : `${getServerUrl()}${parentPhoto.startsWith('/') ? '' : '/'}${parentPhoto}`}
-                          alt="Parent"
-                          className="w-8 h-8 rounded-full object-cover shadow-sm border border-white/20"
-                        />
-                      </ImagePreview>
-                    ) : (
-                      <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center shadow-sm border border-white/20">
-                        <span className="text-xs text-muted-foreground font-bold">{baby.parentName ? baby.parentName.charAt(0).toUpperCase() : "P"}</span>
-                      </div>
-                    )}
+
+
                     <p className="font-medium text-foreground">{baby.parentName || "Unknown"}</p>
                   </div>
                 </div>
@@ -252,55 +252,50 @@ export default function BabyDetailPage() {
                   <div className="flex flex-wrap gap-2 bg-background/50 p-1 rounded-xl border border-border">
                     <button
                       onClick={() => setActiveCategory("all")}
-                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
-                        activeCategory === "all"
-                          ? "bg-[#EBA545] text-black shadow-sm"
-                          : "text-foreground/75 hover:bg-white/5 hover:text-foreground"
-                      }`}
+                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${activeCategory === "all"
+                        ? "bg-[#EBA545] text-black shadow-sm"
+                        : "text-foreground/75 hover:bg-white/5 hover:text-foreground"
+                        }`}
                     >
                       <FolderHeart className="w-3.5 h-3.5" />
                       All ({totalCount})
                     </button>
                     <button
                       onClick={() => setActiveCategory("photo")}
-                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
-                        activeCategory === "photo"
-                          ? "bg-[#EBA545] text-black shadow-sm"
-                          : "text-foreground/75 hover:bg-white/5 hover:text-foreground"
-                      }`}
+                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${activeCategory === "photo"
+                        ? "bg-[#EBA545] text-black shadow-sm"
+                        : "text-foreground/75 hover:bg-white/5 hover:text-foreground"
+                        }`}
                     >
                       <Camera className="w-3.5 h-3.5" />
                       Photo ({photosCount})
                     </button>
                     <button
                       onClick={() => setActiveCategory("video")}
-                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
-                        activeCategory === "video"
-                          ? "bg-[#EBA545] text-black shadow-sm"
-                          : "text-foreground/75 hover:bg-white/5 hover:text-foreground"
-                      }`}
+                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${activeCategory === "video"
+                        ? "bg-[#EBA545] text-black shadow-sm"
+                        : "text-foreground/75 hover:bg-white/5 hover:text-foreground"
+                        }`}
                     >
                       <Video className="w-3.5 h-3.5" />
                       Video ({videosCount})
                     </button>
                     <button
                       onClick={() => setActiveCategory("voice")}
-                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
-                        activeCategory === "voice"
-                          ? "bg-[#EBA545] text-black shadow-sm"
-                          : "text-foreground/75 hover:bg-white/5 hover:text-foreground"
-                      }`}
+                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${activeCategory === "voice"
+                        ? "bg-[#EBA545] text-black shadow-sm"
+                        : "text-foreground/75 hover:bg-white/5 hover:text-foreground"
+                        }`}
                     >
                       <Volume2 className="w-3.5 h-3.5" />
                       Voice ({voiceCount})
                     </button>
                     <button
                       onClick={() => setActiveCategory("milestone")}
-                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
-                        activeCategory === "milestone"
-                          ? "bg-[#EBA545] text-black shadow-sm"
-                          : "text-foreground/75 hover:bg-white/5 hover:text-foreground"
-                      }`}
+                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${activeCategory === "milestone"
+                        ? "bg-[#EBA545] text-black shadow-sm"
+                        : "text-foreground/75 hover:bg-white/5 hover:text-foreground"
+                        }`}
                     >
                       <Trophy className="w-3.5 h-3.5" />
                       Milestone ({milestoneCount})
@@ -311,27 +306,52 @@ export default function BabyDetailPage() {
 
               {filteredMemories.length > 0 ? (
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
-                  {filteredMemories.map(m => {
-                    const rawUrl = m.mediaUrl || m.media_url || m.thumbnailUrl || m.thumbnail_url;
+                  {filteredMemories.flatMap(m => {
+                    const rawUrl = m.mediaUrl || m.media_url || m.thumbnailUrl || m.thumbnail_url || "";
+                    if (typeof rawUrl === 'string' && rawUrl.includes(',')) {
+                      const urls = rawUrl.split(',');
+                      const rawThumb = m.thumbnailUrl || m.thumbnail_url || "";
+                      const thumbs = typeof rawThumb === 'string' ? rawThumb.split(',') : [];
+
+                      return urls.map((u, i) => ({
+                        ...m,
+                        renderId: `${m.id}-${i}`,
+                        originalId: m.id,
+                        renderMediaUrl: u.trim(),
+                        renderThumbUrl: thumbs[i]?.trim() || thumbs[0]?.trim() || "",
+                        mediaIndex: i,
+                        mediaCount: urls.length
+                      }));
+                    }
+                    return [{
+                      ...m,
+                      renderId: m.id,
+                      originalId: m.id,
+                      renderMediaUrl: rawUrl,
+                      renderThumbUrl: m.thumbnailUrl || m.thumbnail_url || "",
+                      mediaIndex: 0,
+                      mediaCount: 1
+                    }];
+                  }).map(m => {
                     let url = "";
-                    if (rawUrl) {
-                      url = rawUrl.startsWith('http') ? rawUrl : `${getServerUrl()}${rawUrl.startsWith('/') ? '' : '/'}${rawUrl}`;
+                    if (m.renderMediaUrl) {
+                      url = m.renderMediaUrl.startsWith('http') ? m.renderMediaUrl : `${getServerUrl()}${m.renderMediaUrl.startsWith('/') ? '' : '/'}${m.renderMediaUrl}`;
                     }
 
-                    const rawThumb = m.thumbnailUrl || m.thumbnail_url;
                     let thumbUrl = "";
-                    if (rawThumb) {
-                      thumbUrl = rawThumb.startsWith('http') ? rawThumb : `${getServerUrl()}${rawThumb.startsWith('/') ? '' : '/'}${rawThumb}`;
+                    if (m.renderThumbUrl) {
+                      thumbUrl = m.renderThumbUrl.startsWith('http') ? m.renderThumbUrl : `${getServerUrl()}${m.renderThumbUrl.startsWith('/') ? '' : '/'}${m.renderThumbUrl}`;
                     }
 
                     const isVid = m.type === "video" || (url && url.toLowerCase().match(/\.(mp4|webm|ogg|mov)$/i));
                     const isAud = m.type === "voice" || m.type === "audio" || (url && url.toLowerCase().match(/\.(mp3|wav|m4a|aac)$/i));
+                    const mediaCount = m.mediaCount;
 
                     return (
-                      <div key={m.id} className="aspect-square bg-muted rounded-xl border border-border overflow-hidden relative group">
+                      <div key={m.renderId} className="aspect-square bg-muted rounded-xl border border-border overflow-hidden relative group">
                         {/* Top Right Link to Detail Page */}
                         <Link
-                          to={`/memories/${m.id}?mode=view`}
+                          to={`/memories/${m.originalId}?mode=view`}
                           className="absolute top-2 right-2 bg-black/40 hover:bg-black/70 text-white p-1.5 rounded-full z-30 backdrop-blur-sm transition-colors"
                           title="View Details"
                         >
@@ -393,16 +413,17 @@ export default function BabyDetailPage() {
           <div className="bg-card shadow-sm rounded-xl border border-border px-6 pb-6 pt-20 mt-16 relative flex flex-col items-center w-full">
             {/* Overlapping Photo */}
             <div className="absolute -top-16">
-              {baby.profile_photo ? (
-                <ImagePreview src={baby.profile_photo} alt={baby.name}>
+              {baby.profile_photo && !profileImageError ? (
+                <ImagePreview src={getFullUrl(baby.profile_photo)} alt={baby.name}>
                   <img
-                    src={baby.profile_photo}
+                    src={getFullUrl(baby.profile_photo)}
                     alt={baby.name}
-                    className="w-32 h-32 rounded-full object-cover shadow-lg"
+                    className="w-32 h-32 rounded-full object-cover shadow-lg bg-background"
+                    onError={() => setProfileImageError(true)}
                   />
                 </ImagePreview>
               ) : (
-                <div className="w-32 h-32 rounded-full bg-muted flex items-center justify-center shadow-lg">
+                <div className="w-32 h-32 rounded-full bg-muted flex items-center justify-center shadow-lg border-4 border-background">
                   <span className="text-3xl text-muted-foreground font-bold">
                     {baby.name ? baby.name.charAt(0).toUpperCase() : "B"}
                   </span>
@@ -455,4 +476,4 @@ export default function BabyDetailPage() {
       </div>
     </div>
   );
-}
+} 

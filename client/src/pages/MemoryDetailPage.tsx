@@ -21,52 +21,69 @@ export default function MemoryDetailPage() {
       return <p className="text-sm text-muted-foreground italic">No media attached.</p>;
     }
 
-    const getFullUrl = (raw: string) => raw.startsWith('http') ? raw : `${getServerUrl()}${raw.startsWith('/') ? '' : '/'}${raw}`;
+    const getFullUrls = (raw: string) => {
+      if (!raw) return [];
+      return raw.split(',').map(p => {
+        const cleanPath = p.trim();
+        return cleanPath.startsWith('http') ? cleanPath : `${getServerUrl()}${cleanPath.startsWith('/') ? '' : '/'}${cleanPath}`;
+      });
+    };
 
-    const mediaUrl = hasMedia ? getFullUrl(formData.media_url) : "";
-    const thumbUrl = hasThumb ? getFullUrl(formData.thumbnail_url) : "";
+    const mediaUrls = hasMedia ? getFullUrls(formData.media_url) : [];
+    const thumbUrls = hasThumb ? getFullUrls(formData.thumbnail_url) : [];
 
-    if (hasMedia) {
+    if (hasMedia && mediaUrls.length > 0) {
       const type = memory?.type || "";
-      const lowerUrl = mediaUrl.toLowerCase();
-      const isVid = type === "video" || lowerUrl.match(/\.(mp4|webm|ogg|mov)$/i);
-      const isAud = type === "voice" || type === "audio" || lowerUrl.match(/\.(mp3|wav|m4a|aac)$/i);
-      const isImg = type === "photo" || type === "image" || lowerUrl.match(/\.(jpeg|jpg|gif|png|webp)$/i);
 
-      if (isVid) {
-        return (
-          <ProtectedMedia
-            mediaType="video"
-            src={mediaUrl}
-            poster={thumbUrl || undefined}
-            className="w-full max-h-96 rounded border border-border bg-black/5 object-contain"
-          />
-        );
-      } else if (isAud) {
-        return (
-          <div className="space-y-4">
-            {thumbUrl && (
-              <ImagePreview src={thumbUrl} alt="Thumbnail">
-                <ProtectedMedia src={thumbUrl} alt="Thumbnail" className="w-full max-h-64 object-contain rounded border border-border bg-black/5" />
-              </ImagePreview>
-            )}
-            <ProtectedMedia mediaType="audio" src={mediaUrl} className="w-full" />
-          </div>
-        );
-      } else {
-        // Default to photo/image for unknown types or when isImg is true
-        return (
-          <ImagePreview src={mediaUrl} alt="Media">
-            <ProtectedMedia src={mediaUrl} alt="Media" className="w-full max-h-96 object-contain rounded border border-border bg-black/5" />
-          </ImagePreview>
-        );
-      }
+      return (
+        <div className="flex flex-col gap-4">
+          {mediaUrls.map((mediaUrl, index) => {
+            const thumbUrl = thumbUrls[index] || thumbUrls[0] || "";
+            const lowerUrl = mediaUrl.toLowerCase();
+            const isVid = type === "video" || lowerUrl.match(/\.(mp4|webm|ogg|mov)$/i);
+            const isAud = type === "voice" || type === "audio" || lowerUrl.match(/\.(mp3|wav|m4a|aac)$/i);
+
+            if (isVid) {
+              return (
+                <ProtectedMedia
+                  key={index}
+                  mediaType="video"
+                  src={mediaUrl}
+                  poster={thumbUrl || undefined}
+                  className="w-full max-h-96 rounded border border-border bg-black/5 object-contain"
+                />
+              );
+            } else if (isAud) {
+              return (
+                <div key={index} className="space-y-4">
+                  {thumbUrl && (
+                    <ImagePreview src={thumbUrl} alt="Thumbnail">
+                      <ProtectedMedia src={thumbUrl} alt="Thumbnail" className="w-full max-h-64 object-contain rounded border border-border bg-black/5" />
+                    </ImagePreview>
+                  )}
+                  <ProtectedMedia mediaType="audio" src={mediaUrl} className="w-full" />
+                </div>
+              );
+            } else {
+              return (
+                <ImagePreview key={index} src={mediaUrl} alt="Media">
+                  <ProtectedMedia src={mediaUrl} alt="Media" className="w-full max-h-96 object-contain rounded border border-border bg-black/5" />
+                </ImagePreview>
+              );
+            }
+          })}
+        </div>
+      );
     }
 
     return (
-      <ImagePreview src={thumbUrl} alt="Thumbnail">
-        <ProtectedMedia src={thumbUrl} alt="Thumbnail" className="w-full max-h-96 object-contain rounded border border-border bg-black/5" />
-      </ImagePreview>
+      <div className="flex flex-col gap-4">
+        {thumbUrls.map((thumbUrl, index) => (
+          <ImagePreview key={index} src={thumbUrl} alt="Thumbnail">
+            <ProtectedMedia src={thumbUrl} alt="Thumbnail" className="w-full max-h-96 object-contain rounded border border-border bg-black/5" />
+          </ImagePreview>
+        ))}
+      </div>
     );
   };
 

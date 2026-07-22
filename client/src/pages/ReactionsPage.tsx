@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Trash2, X, Eye, Loader2 } from "lucide-react";
 import { PaginationControls } from "../components/ui/PaginationControls";
 import { ConfirmDialog } from "../components/ConfirmDialog";
@@ -35,6 +36,7 @@ const isDateInRange = (dateStr: string, range: string) => {
 
 export default function ReactionsPage() {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [reactions, setReactions] = useState<any[]>([]);
   const [allReactions, setAllReactions] = useState<any[]>([]);
   const [selectedLikeRange, setSelectedLikeRange] = useState<string>("");
@@ -49,30 +51,8 @@ export default function ReactionsPage() {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [confirmingId, setConfirmingId] = useState<string | null>(null);
 
-  // Memory Detail Modal States
-  const [detailModalOpen, setDetailModalOpen] = useState(false);
-  const [detailLoading, setDetailLoading] = useState(false);
-  const [selectedMemory, setSelectedMemory] = useState<any>(null);
-  const [selectedMemoryId, setSelectedMemoryId] = useState<string | null>(null);
-
-  const handleViewDetails = async (reaction: any) => {
-    setSelectedMemoryId(reaction.memory_id);
-    setSelectedMemory(null);
-    setDetailLoading(true);
-    setDetailModalOpen(true);
-    try {
-      const data = await apiFetch<any>(`/admin/memories/${reaction.memory_id}`);
-      setSelectedMemory(data);
-    } catch (err: any) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: err.message || "Failed to load memory details.",
-      });
-      setDetailModalOpen(false);
-    } finally {
-      setDetailLoading(false);
-    }
+  const handleViewDetails = (reaction: any) => {
+    navigate(`/memories/${reaction.memory_id}?mode=view`);
   };
 
   const loadAllReactions = async () => {
@@ -371,109 +351,6 @@ export default function ReactionsPage() {
           setConfirmingId(null);
         }}
       />
-
-      {/* Memory Details Modal */}
-      {detailModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fadeIn">
-          <div className="bg-card border border-border w-full max-w-lg rounded-xl shadow-2xl overflow-hidden animate-scaleUp">
-            {/* Header */}
-            <div className="px-6 py-4 border-b border-border flex items-center justify-between bg-background">
-              <h3 className="text-base font-semibold text-white">Memory Details & Reactions</h3>
-              <button
-                onClick={() => setDetailModalOpen(false)}
-                className="text-white/60 hover:text-white transition-colors cursor-pointer"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-
-            {/* Content */}
-            <div className="p-6 space-y-4 max-h-[70vh] overflow-y-auto dropdown-scrollbar">
-              {detailLoading ? (
-                <div className="flex flex-col items-center justify-center py-12 gap-3">
-                  <Loader2 className="h-8 w-8 text-[#EBA545] animate-spin" />
-                  <span className="text-sm text-white/60 font-medium">Fetching details...</span>
-                </div>
-              ) : selectedMemory ? (
-                <div className="space-y-4">
-                  {/* Media */}
-                  {(selectedMemory.media_url || selectedMemory.thumbnail_url) && (
-                    <div className="relative rounded-lg overflow-hidden border border-border bg-black/10 flex justify-center items-center p-2">
-                      {(() => {
-                        const getFullUrl = (raw: string) => raw.startsWith('http') ? raw : `${getServerUrl()}${raw.startsWith('/') ? '' : '/'}${raw}`;
-                        const mediaUrl = selectedMemory.media_url ? getFullUrl(selectedMemory.media_url) : "";
-                        const thumbUrl = selectedMemory.thumbnail_url ? getFullUrl(selectedMemory.thumbnail_url) : "";
-                        const type = selectedMemory.type || "";
-                        const lowerUrl = mediaUrl.toLowerCase();
-
-                        const isVid = type === "video" || lowerUrl.match(/\.(mp4|webm|ogg|mov)$/i);
-                        const isAud = type === "voice" || type === "audio" || lowerUrl.match(/\.(mp3|wav|m4a|aac)$/i);
-
-                        if (isVid) {
-                          return <video src={mediaUrl} poster={thumbUrl || undefined} controls className="w-full max-h-56 object-contain rounded" />;
-                        } else if (isAud) {
-                          return <audio src={mediaUrl} controls className="w-full" />;
-                        } else {
-                          return <img src={mediaUrl || thumbUrl} alt="Memory attachment" className="w-full max-h-56 object-contain rounded" />;
-                        }
-                      })()}
-                    </div>
-                  )}
-
-                  {/* Caption & Metadata */}
-                  <div className="space-y-2">
-                    <p className="text-sm font-semibold text-white/90">
-                      {selectedMemory.caption || <span className="text-white/40 italic">No caption</span>}
-                    </p>
-                    <div className="flex flex-wrap gap-2 text-xs">
-                      <span className="bg-white/5 border border-border px-2 py-0.5 rounded-full text-white/60">
-                        Baby: <span className="text-white font-medium">{selectedMemory.babyName || "Unknown"}</span>
-                      </span>
-                      <span className="bg-white/5 border border-border px-2 py-0.5 rounded-full text-white/60">
-                        Category: <span className="text-white font-medium capitalize">{selectedMemory.category || "everyday"}</span>
-                      </span>
-                      <span className="bg-white/5 border border-border px-2 py-0.5 rounded-full text-white/60">
-                        Visibility: <span className="text-white font-medium capitalize">{selectedMemory.visibility || "family"}</span>
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Divider */}
-                  <div className="h-px bg-border my-4" />
-
-                  {/* Reactions List */}
-                  <div>
-                    <h4 className="text-xs font-semibold uppercase tracking-wider text-white/50 mb-2">
-                      Reactions ({allReactions.filter(x => x.memory_id === selectedMemoryId).length})
-                    </h4>
-                    <div className="space-y-2 max-h-48 overflow-y-auto dropdown-scrollbar pr-1">
-                      {allReactions
-                        .filter(x => x.memory_id === selectedMemoryId)
-                        .map((mr) => (
-                          <div
-                            key={mr.id}
-                            className="flex items-center justify-between p-3 rounded-lg bg-background border border-border"
-                          >
-                            <div className="flex flex-col">
-                              <span className="text-sm font-semibold text-white">{mr.userName || "Unknown"}</span>
-                            </div>
-                            <div className="flex items-center gap-3">
-                              <span className="text-[11px] text-white/50">{formatDate(mr.created_at)}</span>
-                            </div>
-                          </div>
-                        ))}
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                <div className="text-center py-6 text-sm text-white/50">
-                  Failed to load memory details.
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
